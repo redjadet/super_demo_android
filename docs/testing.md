@@ -1,0 +1,28 @@
+# Testing
+
+## Unit (`./gradlew testDebugUnitTest`)
+
+| Test | Covers |
+| --- | --- |
+| `CachingFeedRepositoryTest` | Seed, remote write-through, offline stale cache, bookmarks |
+| `FeedViewModelTest` | Local-first state, offline `showingLocalOnly` |
+| `RoomItemRepositoryTest` | Seed + CRUD |
+| `AppDeepLinkTest` | Deep-link parsing (Robolectric) |
+
+## Instrumentation (`./gradlew connectedDebugAndroidTest`)
+
+Requires a running emulator/device (this Mac Mini: AVD `Small_Phone_3`, API 36).
+
+| Test | Covers |
+| --- | --- |
+| `MainActivitySmokeTest` | Dashboard default, Items/Feed tabs, risks navigation |
+| `OfflineFeedInstrumentationTest` | Feed list from Room source of truth when remote fails |
+
+Hilt test runner: `com.redjadet.superdemo.HiltTestRunner`.
+
+Espresso / AndroidX Test alphas (`espresso-core` 3.8.0-alpha01) are pinned because
+stable Espresso 3.6/3.7 still calls removed `InputManager.getInstance()` on API 36.
+
+## Commands
+
+See [build-and-run.md](build-and-run.md).

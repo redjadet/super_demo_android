@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+# Lean local proof gate for super_demo_android (adapted from iOS checklist spirit).
+set -euo pipefail
+
+ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+cd "$ROOT"
+
+export JAVA_HOME="${JAVA_HOME:-/Users/ilkersevim/Library/Java/JavaVirtualMachines/jbr-21.0.11/Contents/Home}"
+export ANDROID_HOME="${ANDROID_HOME:-$HOME/Library/Android/sdk}"
+export PATH="$JAVA_HOME/bin:$ANDROID_HOME/platform-tools:$ANDROID_HOME/emulator:$PATH"
+
+echo "==> Unit tests"
+./gradlew testDebugUnitTest --stacktrace
+
+echo "==> Assemble debug + androidTest"
+./gradlew :app:assembleDebug :app:assembleDebugAndroidTest --stacktrace
+
+echo "==> Android Lint"
+./gradlew :app:lintDebug --stacktrace
+
+if adb devices | grep -E 'emulator-[0-9]+\s+device' >/dev/null; then
+  echo "==> Connected instrumentation (emulator present)"
+  ./gradlew connectedDebugAndroidTest --stacktrace
+else
+  echo "ERROR: No emulator device in 'adb devices'. Start AVD Small_Phone_3 first." >&2
+  exit 1
+fi
+
+echo "Checklist green."

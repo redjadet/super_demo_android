@@ -1,0 +1,148 @@
+package com.redjadet.superdemo.features.items.presentation
+
+import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.redjadet.superdemo.features.items.domain.Item
+import com.redjadet.superdemo.features.items.domain.ItemRepository
+import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
+import javax.inject.Inject
+
+data class ItemsUiState(
+    val isLoading: Boolean = true,
+    val items: List<Item> = emptyList(),
+    val draftTitle: String = "",
+    val errorMessage: String? = null,
+)
+
+@HiltViewModel
+class ItemsViewModel @Inject constructor(
+    private val repository: ItemRepository,
+) : ViewModel() {
+
+    private val _state = MutableStateFlow(ItemsUiState())
+    val state: StateFlow<ItemsUiState> = _state.asStateFlow()
+
+    init {
+        viewModelScope.launch {
+            runCatching { repository.ensureSeeded() }
+                .onFailure { error ->
+                    if (error is CancellationException) throw error
+                    _state.update {
+                        it.copy(isLoading = false, errorMessage = error.message ?: "Seed failed")
+                    }
+                }
+            repository.observeItems().collect { items ->
+                _state.update {
+                    it.copy(isLoading = false, items = items, errorMessage = null)
+                }
+            }
+        }
+    }
+
+    fun onDraftTitleChange(value: String) {
+        _state.update { it.copy(draftTitle = value) }
+    }
+
+    fun addDraft() {
+        val title = _state.value.draftTitle.trim()
+        if (title.isEmpty()) return
+        viewModelScope.launch {
+            runCatching { repository.addItem(title = title, notes = "Added from Items tab") }
+                .onSuccess { _state.update { it.copy(draftTitle = "") } }
+                .onFailure { error ->
+                    if (error is CancellationException) throw error
+                    _state.update {
+                        it.copy(errorMessage = error.message ?: "Could not add item")
+                    }
+                }
+        }
+    }
+
+    fun delete(id: Long) {
+        viewModelScope.launch {
+            runCatching { repository.deleteItem(id) }
+                .onFailure { error ->
+                    if (error is CancellationException) throw error
+                    _state.update {
+                        it.copy(errorMessage = error.message ?: "Could not delete item")
+                    }
+                }
+        }
+    }
+}
+
+data class ItemDetailUiState(
+    val isLoading: Boolean = true,
+    val item: Item? = null,
+    val title: String = "",
+    val notes: String = "",
+    val saved: Boolean = false,
+    val errorMessage: String? = null,
+)
+
+@HiltViewModel
+class ItemDetailViewModel @Inject constructor(
+    private val repository: ItemRepository,
+    savedStateHandle: SavedStateHandle,
+) : ViewModel() {
+
+    private val itemId: Long = checkNotNull(savedStateHandle["itemId"])
+
+    private val _state = MutableStateFlow(ItemDetailUiState())
+    val state: StateFlow<ItemDetailUiState> = _state.asStateFlow()
+
+    init {
+        viewModelScope.launch {
+            runCatching { repository.getItem(itemId) }
+                .onSuccess { item ->
+                    _state.value = ItemDetailUiState(
+                        isLoading = false,
+                        item = item,
+                        title = item?.title.orEmpty(),
+                        notes = item?.notes.orEmpty(),
+                    )
+                }
+                .onFailure { error ->
+                    if (error is CancellationException) throw error
+                    _state.value = ItemDetailUiState(
+                        isLoading = false,
+                        errorMessage = error.message ?: "Failed to load item",
+                    )
+                }
+        }
+    }
+
+    fun onTitleChange(value: String) {
+        _state.update { it.copy(title = value, saved = false) }
+    }
+
+    fun onNotesChange(value: String) {
+        _state.update { it.copy(notes = value, saved = false) }
+    }
+
+    fun save() {
+        viewModelScope.launch {
+            runCatching {
+                repository.updateItem(
+                    id = itemId,
+                    title = _state.value.title,
+                    notes = _state.value.notes,
+                )
+            }.onSuccess { updated ->
+                _state.update { it.copy(item = updated, saved = updated != null) }
+            }.onFailure { error ->
+                if (error is CancellationException) throw error
+                _state.update {
+                    it.copy(errorMessage = error.message ?: "Could not save item")
+                }
+            }
+        }
+    }
+}
