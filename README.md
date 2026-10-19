@@ -72,11 +72,14 @@ export PATH="$JAVA_HOME/bin:$ANDROID_HOME/platform-tools:$ANDROID_HOME/emulator:
 # Install debug APK
 ./gradlew :app:installDebug
 
-# Instrumentation / Compose UI tests (emulator must be running)
-emulator -avd Small_Phone_3 -netdelay none -netspeed full &
-adb wait-for-device
-./gradlew connectedDebugAndroidTest
+# Full local gate (unit + assemble + lint + connected instrumentation)
+# Requires AVD Small_Phone_3 online (API 36; headless -no-window is fine)
+./bin/checklist
 ```
+
+CI (GitHub Actions) runs unit tests, `assembleDebug`, `lintDebug`, and
+`assembleDebugAndroidTest`. Connected emulator tests stay local via
+`./bin/checklist` on this Mac Mini.
 
 Android Studio: **Open** `/Volumes/Lacie_Ssd/projects/super_demo_android`, run the
 `app` configuration on an emulator or device.
