@@ -1,9 +1,37 @@
 # super_demo_android
 
+[![3-minute path](https://img.shields.io/badge/3--minute-reviewer%20path-3DDC84)](docs/portfolio.md#3-minute-path)
+[![Architecture](https://img.shields.io/badge/Architecture-tour-0A7A3E)](docs/architecture.md)
+[![Offline-first](https://img.shields.io/badge/Data-Offline--first-16A34A)](docs/offline-first.md)
+[![Testing](https://img.shields.io/badge/Testing-Unit%20%7C%20Instrumentation-2E7D32)](docs/testing.md)
+[![Local gate](https://img.shields.io/badge/Gate-%2Fbin%2Fchecklist-1B5E20)](bin/checklist)
+
+[![CI](https://github.com/redjadet/super_demo_android/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/redjadet/super_demo_android/actions/workflows/ci.yml)
+
+![Kotlin](https://img.shields.io/badge/Kotlin-2.1.20-7F52FF?logo=kotlin&logoColor=white)
+![Compose](https://img.shields.io/badge/Jetpack%20Compose-BOM%202025.04.01-4285F4?logo=jetpackcompose&logoColor=white)
+![Material 3](https://img.shields.io/badge/Material%203-UI-6750A4?logo=materialdesign&logoColor=white)
+![Room](https://img.shields.io/badge/Room-source%20of%20truth-4285F4?logo=android&logoColor=white)
+![Hilt](https://img.shields.io/badge/DI-Hilt-8E44AD)
+![Coroutines](https://img.shields.io/badge/Async-Coroutines%20%7C%20Flow-E76F00)
+![Nav](https://img.shields.io/badge/Navigation-Compose-0F9D58)
+![Networking](https://img.shields.io/badge/Networking-Retrofit%20%7C%20OkHttp-0EA5E9)
+
+![Platform](https://img.shields.io/badge/Platform-Android-3DDC84?logo=android&logoColor=white)
+![minSdk](https://img.shields.io/badge/minSdk-26-6E6E73?logo=android&logoColor=white)
+![targetSdk](https://img.shields.io/badge/targetSdk%20%2F%20compileSdk-36-6E6E73?logo=android&logoColor=white)
+![AGP](https://img.shields.io/badge/AGP-8.9.1-3DDC84?logo=android&logoColor=white)
+![Architecture](https://img.shields.io/badge/Architecture-Clean%20layers%20%7C%20UDF-0A7A3E)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
 Kotlin / Jetpack Compose portfolio demo mirroring the structure of
 [super_demo_ios](https://github.com/redjadet/super_demo_ios): **Dashboard**,
 **Items**, and **Feed** tabs with clean layers, offline-capable Feed caching,
 Room-backed Items, Navigation Compose, and Hilt DI.
+
+This is a portfolio sample, not a Play Store product. CI runs unit tests,
+assemble, lint, and androidTest compile; connected emulator proof is local via
+[`./bin/checklist`](bin/checklist).
 
 Author: [İlker Sevim](https://redjadet.github.io/react-web-portfolio/).
 
