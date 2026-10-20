@@ -31,7 +31,7 @@ assist with implementation drafts, tests, and docs.
 
 | Evidence | Commit and scope |
 | --- | --- |
-| **Recorded hosted run** | [Main run 39385583052](https://github.com/redjadet/super_demo_android/actions/runs/39385583052), **2026-10-20**, `4c5b706`: unit tests, assembleDebug, lintDebug, assembleDebugAndroidTest. Emulator instrumentation is **not** in this lane. |
+| **Recorded hosted run** | [Main run 39389215172](https://github.com/redjadet/super_demo_android/actions/runs/39389215172), **2026-10-20**, `f75bea2`: unit tests, assembleDebug, lintDebug, assembleDebugAndroidTest. Emulator instrumentation is **not** in this lane. |
 | **Unit** | `./gradlew testDebugUnitTest` — repository (incl. concurrent bookmark race), ViewModel, Items, deep links |
 | **Local full gate** | `./bin/checklist` — unit + assemble + lint + `connectedDebugAndroidTest` on a booted device/emulator |
 | **Hosted CI** | [`.github/workflows/ci.yml`](../.github/workflows/ci.yml) — unit, assembleDebug, lintDebug, assembleDebugAndroidTest. **Does not** run an emulator |
