@@ -30,9 +30,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.redjadet.superdemo.app.ui.ReviewerContentWidth
+import com.redjadet.superdemo.features.dashboard.domain.EngineeringDemo
 import com.redjadet.superdemo.features.dashboard.domain.ReadinessMetric
 import com.redjadet.superdemo.features.dashboard.domain.ReadinessStatus
 
@@ -111,13 +112,13 @@ fun DashboardRoute(
             item {
                 Text("Release health", style = MaterialTheme.typography.titleLarge)
             }
-            items(snapshot.metrics, key = { it.id }) { metric ->
+            items(snapshot.metrics, key = ReadinessMetric::id) { metric ->
                 MetricRow(metric)
             }
             item {
                 Text("Engineering demos", style = MaterialTheme.typography.titleLarge)
             }
-            items(snapshot.demos, key = { it.id }) { demo ->
+            items(snapshot.demos, key = EngineeringDemo::id) { demo ->
                 Surface(
                     tonalElevation = 1.dp,
                     shape = RoundedCornerShape(12.dp),

@@ -16,15 +16,19 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 abstract class RepositoryBindings {
 
+    // Invoked by Hilt code generation — IDE unused-symbol inspections are false positives.
     @Binds
     @Singleton
+    @Suppress("unused")
     abstract fun bindFeedRepository(impl: CachingFeedRepository): FeedRepository
 
     @Binds
     @Singleton
+    @Suppress("unused")
     abstract fun bindItemRepository(impl: RoomItemRepository): ItemRepository
 
     @Binds
     @Singleton
+    @Suppress("unused")
     abstract fun bindDashboardRepository(impl: SampleDashboardRepository): DashboardRepository
 }

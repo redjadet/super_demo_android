@@ -1,3 +1,5 @@
+@file:Suppress("UnstableApiUsage") // dependencyResolutionManagement / RepositoriesMode are @Incubating.
+
 pluginManagement {
     repositories {
         google {
@@ -12,7 +14,7 @@ pluginManagement {
     }
 }
 plugins {
-    id("org.gradle.toolchains.foojay-resolver-convention") version "0.10.0"
+    id("org.gradle.toolchains.foojay-resolver-convention") version "1.0.0"
 }
 
 dependencyResolutionManagement {

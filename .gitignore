@@ -34,6 +34,19 @@ connected-test.log
 build-unit.log
 tasks/codex/
 
-emulator.log
-build-unit.log
-*.log
+# IDE inspection export dumps (local only)
+/Inspections/
+/AndroidLint*.xml
+/Annotator.xml
+/CheckEmptyScriptTag.xml
+/GrazieInspection.xml
+/GrazieStyle.xml
+/HtmlUnknown*.xml
+/IgnoreFileDuplicateEntry.xml
+/Markdown*.xml
+/RedundantSamConstructor.xml
+/SpellCheckingInspection.xml
+/UnstableApiUsage.xml
+/UnusedSymbol.xml
+/UsePropertyAccessSyntax.xml
+/.descriptions.xml

@@ -7,7 +7,6 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
-import androidx.core.util.Consumer
 import com.redjadet.superdemo.app.navigation.AppDeepLink
 import com.redjadet.superdemo.app.navigation.AppRoot
 import com.redjadet.superdemo.app.ui.theme.SuperDemoTheme
@@ -26,19 +25,16 @@ class MainActivity : ComponentActivity() {
                 Surface(modifier = Modifier.fillMaxSize()) {
                     AppRoot(
                         initialDeepLink = initialLink,
-                        deepLinkConsumer = { consumer ->
-                            onNewDeepLink = consumer
-                        },
-                    )
+                    ) { consumer ->
+                        onNewDeepLink = consumer
+                    }
                 }
             }
         }
-        addOnNewIntentListener(
-            Consumer { newIntent ->
-                setIntent(newIntent)
-                onNewDeepLink?.invoke(AppDeepLink.fromIntent(newIntent))
-            },
-        )
+        addOnNewIntentListener { newIntent ->
+            intent = newIntent
+            onNewDeepLink?.invoke(AppDeepLink.fromIntent(newIntent))
+        }
     }
 
     /** Instrumentation helper: deliver a deep link without replacing the launch Intent. */

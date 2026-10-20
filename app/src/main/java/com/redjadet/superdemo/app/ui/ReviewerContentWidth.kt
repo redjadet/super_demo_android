@@ -33,7 +33,7 @@ fun ReviewerContentWidth(
             .fillMaxSize()
             .testTag("reviewerContentWidth"),
     ) {
-        val wide = shouldCapReviewerContentWidth(maxWidth.value)
+        val wide = shouldCapReviewerContentWidth(this.maxWidth.value)
         Box(
             modifier = Modifier
                 .align(Alignment.TopCenter)

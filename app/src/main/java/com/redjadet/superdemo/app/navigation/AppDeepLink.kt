@@ -28,7 +28,7 @@ sealed interface AppDeepLink {
                 segments == listOf("dashboard") -> Dashboard
                 segments == listOf("items") -> Items
                 segments == listOf("feed") -> Feed
-                segments.size == 2 && segments[0] == "feed" ->
+                (segments.size == 2) && (segments[0] == "feed") ->
                     segments[1].toIntOrNull()?.takeIf { it > 0 }?.let(::FeedPost)
                 else -> null
             }
