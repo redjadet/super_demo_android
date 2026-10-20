@@ -31,7 +31,7 @@ assist with implementation drafts, tests, and docs.
 
 | Evidence | Commit and scope |
 | --- | --- |
-| **Recorded hosted run** | [CI 39407809001](https://github.com/redjadet/super_demo_android/actions/runs/39407809001) + [Emulator 39407808997](https://github.com/redjadet/super_demo_android/actions/runs/39407808997), **2026-10-20**, `495c8e9` (AGP 9.4.1 / Gradle 9.8). Prefer newest green tip after each push. |
+| **Recorded hosted run** | [CI 39410313726](https://github.com/redjadet/super_demo_android/actions/runs/39410313726) + [Emulator 39410313774](https://github.com/redjadet/super_demo_android/actions/runs/39410313774), **2026-10-20**, `303cea1` (AGP 9.4.1 / Gradle 9.8.2 / SDK 37). Prefer newest green tip after each push. |
 | **Unit** | `./gradlew testDebugUnitTest` — repository (incl. concurrent bookmark race), ViewModel, Items, deep links, tablet breakpoint |
 | **Local full gate** | `./bin/checklist` — unit + assemble + lint + `connectedDebugAndroidTest` on a booted device/emulator |
 | **Hosted CI** | [`.github/workflows/ci.yml`](../.github/workflows/ci.yml) — unit, assembleDebug, lintDebug, assembleDebugAndroidTest |
