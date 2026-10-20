@@ -1,6 +1,7 @@
 package com.redjadet.superdemo.features.items.data
 
 import android.content.Context
+import androidx.core.content.edit
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -15,7 +16,7 @@ class ItemSeedStore @Inject constructor(
     fun hasSeeded(): Boolean = prefs.getBoolean(KEY, false)
 
     fun markSeeded() {
-        prefs.edit().putBoolean(KEY, true).apply()
+        prefs.edit { putBoolean(KEY, true) }
     }
 
     companion object {

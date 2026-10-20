@@ -19,6 +19,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavType
@@ -138,7 +139,7 @@ fun AppRoot(
                                 contentDescription = null,
                             )
                         },
-                        label = { Text(tab.label) },
+                        label = { Text(stringResource(tab.labelResId)) },
                         modifier = Modifier.testTag("${tab.name.lowercase()}Tab"),
                     )
                 }

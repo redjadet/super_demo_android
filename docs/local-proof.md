@@ -17,9 +17,9 @@ then `connectedDebugAndroidTest` on whatever device/emulator `adb` reports as
 | Device | `emulator-5554` (AVD `Small_Phone_3`, API 36 / Android 16) |
 | Result | **Checklist green** |
 
-| Tip SHA | [`36b22a9`](https://github.com/redjadet/super_demo_android/commit/36b22a9e5749188cb04b4d974b0e0b772b55e0d9) |
-| Hosted unit CI | [run 39396907199](https://github.com/redjadet/super_demo_android/actions/runs/39396907199) |
-| Hosted emulator | [run 39396907119](https://github.com/redjadet/super_demo_android/actions/runs/39396907119) (API 34 `aosp_atd`) |
+| Tip SHA | [`73b52c9`](https://github.com/redjadet/super_demo_android/commit/73b52c9) |
+| Hosted unit CI | [run 39405053930](https://github.com/redjadet/super_demo_android/actions/runs/39405053930) |
+| Hosted emulator | [run 39405053842](https://github.com/redjadet/super_demo_android/actions/runs/39405053842) (API 34 `aosp_atd`) |
 
 ## Notes
 
