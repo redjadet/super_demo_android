@@ -30,6 +30,18 @@ class MainActivitySmokeTest {
     fun dashboard_isDefaultTab() {
         composeRule.onNodeWithTag("dashboardHeadline").assertIsDisplayed()
         composeRule.onNodeWithText("Android engineering portfolio").assertIsDisplayed()
+        composeRule.onNodeWithTag("reviewerContentWidth").assertIsDisplayed()
+    }
+
+    @Test
+    fun itemsTab_blankAdd_showsValidationError() {
+        composeRule.onNodeWithTag("itemsTab").performClick()
+        composeRule.onNodeWithTag("itemsDraft").assertIsDisplayed()
+        composeRule.onNodeWithTag("itemsAdd").performClick()
+        composeRule.waitUntil(timeoutMillis = 5_000) {
+            composeRule.onAllNodesWithTag("itemsError").fetchSemanticsNodes().isNotEmpty()
+        }
+        composeRule.onNodeWithText("Title can’t be blank.").assertIsDisplayed()
     }
 
     @Test
@@ -48,20 +60,9 @@ class MainActivitySmokeTest {
     fun feedTab_showsListOrLoading() {
         composeRule.onNodeWithTag("feedTab").performClick()
         composeRule.waitUntil(timeoutMillis = 15_000) {
-            runCatching {
-                composeRule.onNodeWithTag("feedList").assertExists()
-                true
-            }.getOrElse {
-                runCatching {
-                    composeRule.onNodeWithTag("feedLoading").assertExists()
-                    true
-                }.getOrElse {
-                    runCatching {
-                        composeRule.onNodeWithTag("feedError").assertExists()
-                        true
-                    }.getOrDefault(false)
-                }
-            }
+            composeRule.onAllNodesWithTag("feedList").fetchSemanticsNodes().isNotEmpty() ||
+                composeRule.onAllNodesWithTag("feedLoading").fetchSemanticsNodes().isNotEmpty() ||
+                composeRule.onAllNodesWithTag("feedError").fetchSemanticsNodes().isNotEmpty()
         }
     }
 

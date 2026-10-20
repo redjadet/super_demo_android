@@ -52,15 +52,23 @@ class ItemsViewModel @Inject constructor(
     }
 
     fun onDraftTitleChange(value: String) {
-        _state.update { it.copy(draftTitle = value) }
+        _state.update {
+            it.copy(
+                draftTitle = value,
+                errorMessage = if (value.isNotBlank()) null else it.errorMessage,
+            )
+        }
     }
 
     fun addDraft() {
         val title = _state.value.draftTitle.trim()
-        if (title.isEmpty()) return
+        if (title.isEmpty()) {
+            _state.update { it.copy(errorMessage = "Title can’t be blank.") }
+            return
+        }
         viewModelScope.launch {
             runCatching { repository.addItem(title = title, notes = "Added from Items tab") }
-                .onSuccess { _state.update { it.copy(draftTitle = "") } }
+                .onSuccess { _state.update { it.copy(draftTitle = "", errorMessage = null) } }
                 .onFailure { error ->
                     if (error is CancellationException) throw error
                     _state.update {

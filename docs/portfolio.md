@@ -26,7 +26,8 @@ First launch seeds Feed/Items into empty Room stores (offline-first).
 | Cancellation | `FeedViewModel`, repository | Cancel prior refresh; rethrow cancel | `FeedViewModelTest` |
 | Items Flow + seed-once | `ItemLocal`, `ItemSeedStore` | Emptying table does not re-seed | `RoomItemRepositoryTest` |
 | Deep links | `AppDeepLink`, `AppRoot`, Feed detail | Consume pending id; missing → not found | `AppDeepLinkTest`, `FeedDeepLinkInstrumentationTest` |
-| CI honesty | [ci.md](ci.md), `bin/checklist` | Hosted: unit/lint/assemble; emulator local | Workflow + [local-proof.md](local-proof.md) |
+| CI honesty | [ci.md](ci.md), `bin/checklist` | Hosted unit/lint + API 34 emulator workflow; local checklist | Workflows + [local-proof.md](local-proof.md) |
+| Tablet / a11y | `ReviewerContentWidth` | Cap ≥600dp → 840dp max; decorative icons unlabeled | Unit breakpoint test + offline banner text |
 | Design tokens | [DESIGN.md](../DESIGN.md) | M3 + stale banner role | Theme sources |
 
 ## Honesty
@@ -35,11 +36,12 @@ This is a portfolio sample, **not** a Play Store product.
 
 **In repo:** clean feature layers (domain free of Hilt imports), Room SoT,
 Compose/M3, Hilt, Navigation Compose, deep links, unit + instrumentation,
-GHA CI (no hosted emulator).
+GHA unit CI + hosted API 34 emulator lane, adaptive width for tablets.
 
 **Not claimed (intentional):** Apple multi-platform companions, bookmark
 **outbox** sync to a real backend, production auth, minify/R8 release
-hardening, background WorkManager sync, TTL-based cache expiry UI.
+hardening, background WorkManager sync, TTL-based cache expiry UI,
+full TalkBack audit / every-density golden screenshots.
 
 ## Screenshots
 

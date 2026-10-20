@@ -42,5 +42,8 @@ class OfflineFeedInstrumentationTest {
             composeRule.onAllNodesWithTag("feedStaleBanner").fetchSemanticsNodes().isNotEmpty()
         }
         composeRule.onNodeWithTag("feedStaleBanner").assertIsDisplayed()
+        composeRule
+            .onNodeWithText("Offline / sync failed — showing local Room cache.")
+            .assertIsDisplayed()
     }
 }

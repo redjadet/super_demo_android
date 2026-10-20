@@ -33,6 +33,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.redjadet.superdemo.app.ui.ReviewerContentWidth
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -53,10 +54,10 @@ fun ItemsRoute(
             }
         },
     ) { padding ->
+        ReviewerContentWidth(modifier = Modifier.padding(padding)) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(padding)
                 .padding(horizontal = 16.dp),
         ) {
             OutlinedTextField(
@@ -135,6 +136,7 @@ fun ItemsRoute(
                     }
                 }
             }
+        }
         }
     }
 }

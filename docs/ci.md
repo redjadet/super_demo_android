@@ -1,11 +1,15 @@
 # CI
 
-Lean GitHub Actions workflow adapted from the iOS repo’s “build + unit + lint”
-idea — without Xcode / simulator shards.
+Two GitHub Actions workflows:
 
-## Workflow
+| Workflow | What it proves |
+| --- | --- |
+| [`ci.yml`](../.github/workflows/ci.yml) | Unit tests, `assembleDebug`, `lintDebug`, `assembleDebugAndroidTest` |
+| [`emulator.yml`](../.github/workflows/emulator.yml) | `connectedDebugAndroidTest` on **API 34** (ubuntu + KVM) |
 
-[`.github/workflows/ci.yml`](../.github/workflows/ci.yml) on `push` / `pull_request`:
+## Hosted CI (`ci.yml`)
+
+On `push` / `pull_request` to `main`:
 
 | Step | Command / action |
 | --- | --- |
@@ -15,15 +19,20 @@ idea — without Xcode / simulator shards.
 | Android Lint | `./gradlew :app:lintDebug` |
 | Compile androidTest | `./gradlew :app:assembleDebugAndroidTest` |
 
-Artifacts: lint report (always), unit-test HTML report (on failure).
+## Hosted emulator (`emulator.yml`)
 
-Local full gate (includes emulator instrumentation): [`./bin/checklist`](../bin/checklist).
+Runs connected instrumentation on API **34** (`google_apis` / x86_64) via
+`reactivecircus/android-emulator-runner`. Clears `com.redjadet.superdemo.debug`
+before tests (same seed-once determinism as the local checklist).
 
-## Honesty boundaries
+**Honesty:** hosted emulator is API 34 for runner stability. Local Mac
+[`./bin/checklist`](../bin/checklist) may use a newer AVD (e.g. API 36). Both
+lanes exercise the same `androidTest` suite; neither claims the other API level.
 
-- **Instrumentation / emulator tests are not on CI** (heavy for this sample).
-  Run them locally on any booted emulator/device via `./bin/checklist`
-  (see [testing.md](testing.md) and [local-proof.md](local-proof.md)).
-- Android Lint sets `checkTestSources = false` to avoid an AGP FIR crash on
-  Robolectric unit-test sources; app production sources are still linted.
-- Detekt is not required yet; Android Lint covers the static lane for v1.
+Also: Android Lint sets `checkTestSources = false` to avoid an AGP FIR crash on
+Robolectric unit-test sources; app production sources are still linted.
+
+## Local gate
+
+Full local proof (unit + assemble + lint + connected): [`./bin/checklist`](../bin/checklist) ·
+[local-proof.md](local-proof.md).

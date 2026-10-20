@@ -4,8 +4,8 @@
 | --- | --- |
 | [portfolio.md](portfolio.md) | 3-minute path, reviewer map, honesty, screenshots |
 | [EVIDENCE.md](EVIDENCE.md) | Lead engineering case + contribution + proof scope |
-| [architecture-tour.md](architecture-tour.md) | Timed source walk |
-| [architecture.md](architecture.md) | Layer overview |
+| [architecture-tour.md](architecture-tour.md) | Timed source walk (primary) |
+| [architecture.md](architecture.md) | Short map → tour / layers / offline |
 | [offline-first.md](offline-first.md) | Room SoT principles |
 | [layers.md](layers.md) | Feature folder contract |
 | [navigation.md](navigation.md) | Tabs + deep links |

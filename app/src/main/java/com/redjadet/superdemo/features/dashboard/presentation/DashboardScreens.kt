@@ -32,6 +32,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.redjadet.superdemo.app.ui.ReviewerContentWidth
 import com.redjadet.superdemo.features.dashboard.domain.ReadinessMetric
 import com.redjadet.superdemo.features.dashboard.domain.ReadinessStatus
 
@@ -47,22 +48,35 @@ fun DashboardRoute(
     Scaffold(
         topBar = { TopAppBar(title = { Text("Dashboard") }) },
     ) { padding ->
+        ReviewerContentWidth(modifier = Modifier.padding(padding)) {
         if (snapshot == null) {
             Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(padding),
+                modifier = Modifier.fillMaxSize(),
                 contentAlignment = Alignment.Center,
             ) {
-                Text(state.errorMessage ?: "Loading…")
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text(
+                        text = state.errorMessage ?: "Loading…",
+                        modifier = Modifier.testTag("dashboardStatus"),
+                    )
+                    if (state.errorMessage != null) {
+                        TextButton(
+                            onClick = viewModel::refresh,
+                            modifier = Modifier
+                                .padding(top = 12.dp)
+                                .testTag("dashboardRetry"),
+                        ) {
+                            Text("Retry")
+                        }
+                    }
+                }
             }
-            return@Scaffold
+            return@ReviewerContentWidth
         }
 
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(padding)
                 .testTag("dashboardList"),
             contentPadding = PaddingValues(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
@@ -119,6 +133,7 @@ fun DashboardRoute(
                     }
                 }
             }
+        }
         }
     }
 }

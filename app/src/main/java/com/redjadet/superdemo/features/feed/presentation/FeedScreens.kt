@@ -38,6 +38,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.redjadet.superdemo.app.ui.ReviewerContentWidth
 import com.redjadet.superdemo.app.ui.theme.Stale
 import com.redjadet.superdemo.features.feed.domain.FeedDisplayError
 import com.redjadet.superdemo.features.feed.domain.FeedPost
@@ -76,12 +77,11 @@ fun FeedRoute(
             )
         },
     ) { padding ->
+        ReviewerContentWidth(modifier = Modifier.padding(padding)) {
         PullToRefreshBox(
             isRefreshing = state.isLoading,
             onRefresh = viewModel::refresh,
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding),
+            modifier = Modifier.fillMaxSize(),
         ) {
             when {
                 state.isLoading && state.posts.isEmpty() -> {
@@ -101,6 +101,11 @@ fun FeedRoute(
                 else -> {
                     Column(Modifier.fillMaxSize()) {
                         if (state.isStale || state.showingLocalOnly) {
+                            val bannerText = if (state.isStale) {
+                                "Offline / sync failed — showing local Room cache."
+                            } else {
+                                "Showing local posts (offline-first source of truth)."
+                            }
                             Surface(
                                 color = Stale.copy(alpha = 0.18f),
                                 modifier = Modifier
@@ -114,11 +119,7 @@ fun FeedRoute(
                                     verticalAlignment = Alignment.CenterVertically,
                                 ) {
                                     Text(
-                                        text = if (state.isStale) {
-                                            "Offline / sync failed — showing local Room cache."
-                                        } else {
-                                            "Showing local posts (offline-first source of truth)."
-                                        },
+                                        text = bannerText,
                                         style = MaterialTheme.typography.bodyMedium,
                                         modifier = Modifier.weight(1f),
                                     )
@@ -148,6 +149,7 @@ fun FeedRoute(
                     }
                 }
             }
+        }
         }
     }
 }

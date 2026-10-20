@@ -134,7 +134,8 @@ fun AppRoot(
                                     AppTab.Items -> Icons.AutoMirrored.Filled.List
                                     AppTab.Feed -> Icons.Filled.Forum
                                 },
-                                contentDescription = tab.label,
+                                // Label text already announces the tab; keep icon decorative.
+                                contentDescription = null,
                             )
                         },
                         label = { Text(tab.label) },

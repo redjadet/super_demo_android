@@ -4,8 +4,9 @@
 
 | Test | Covers |
 | --- | --- |
-| `CachingFeedRepositoryTest` | Seed, remote write-through, offline stale cache, bookmarks |
+| `CachingFeedRepositoryTest` | Seed, remote write-through, offline stale cache, concurrent bookmarks |
 | `FeedViewModelTest` | Local-first state, offline `showingLocalOnly` |
+| `ItemsViewModelTest` | Blank-title validation; successful add |
 | `RoomItemRepositoryTest` | Seed + CRUD |
 | `AppDeepLinkTest` | Deep-link parsing (Robolectric) |
 
@@ -15,8 +16,8 @@ Requires a running emulator/device (this Mac Mini: AVD `Small_Phone_3`, API 36).
 
 | Test | Covers |
 | --- | --- |
-| `MainActivitySmokeTest` | Dashboard default, Items/Feed tabs, risks navigation |
-| `OfflineFeedInstrumentationTest` | Feed list from Room source of truth when remote fails |
+| `MainActivitySmokeTest` | Dashboard default, Items validation, Feed tabs, risks |
+| `OfflineFeedInstrumentationTest` | Room SoT + stale banner text when remote fails |
 | `FeedDeepLinkInstrumentationTest` | Warm `superdemo://feed/<missing>` → not-found detail |
 
 Hilt test runner: `com.redjadet.superdemo.HiltTestRunner`.
