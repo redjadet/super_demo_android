@@ -13,7 +13,7 @@ overwrite the newer local intent when remote posts arrive.
 | --- | --- |
 | **Design decision** | Keep Feed posts **Room-driven** via `Flow`. After the network returns, read the latest bookmark map **inside** the same `withTransaction` as `clear` + `upsert` so a toggle after the response cannot race the replace. Propagate `CancellationException` (no stale success). Bookmarks are **local-only** in this Android sample (no outbox / remote bookmark API). |
 | **Regression** | `CachingFeedRepositoryTest.refresh_preservesBookmarkToggledDuringNetworkWait` suspends the fake remote, toggles id `1` on a concurrent coroutine, then completes the fetch and asserts the merged row keeps the mid-flight value. |
-| **Passing run** | [Unit · lint · assemble](https://github.com/redjadet/super_demo_android/actions/runs/39410313726) + [Emulator · API 34](https://github.com/redjadet/super_demo_android/actions/runs/39410313774) on **2026-10-20** at [`303cea1`](https://github.com/redjadet/super_demo_android/commit/303cea1). Local Mac gate: [`./bin/checklist`](../bin/checklist) / [local-proof.md](local-proof.md). |
+| **Passing run** | [Unit · lint · assemble](https://github.com/redjadet/super_demo_android/actions/runs/39414201683) + [Emulator · API 34](https://github.com/redjadet/super_demo_android/actions/runs/39414201639) on **2026-10-20** at [`0a9e434`](https://github.com/redjadet/super_demo_android/commit/0a9e434). Local Mac gate: [`./bin/checklist`](../bin/checklist) / [local-proof.md](local-proof.md). |
 | **Related** | `refresh_writesRemoteIntoCacheTransactionally`, `refresh_returnsLocalCacheWhenRemoteFails`, `toggleBookmark_isAtomic`. |
 | **Implementation** | [`CachingFeedRepository.kt`](../app/src/main/java/com/redjadet/superdemo/features/feed/data/CachingFeedRepository.kt) · [`FeedViewModel.kt`](../app/src/main/java/com/redjadet/superdemo/features/feed/presentation/FeedViewModel.kt). |
 
@@ -31,7 +31,7 @@ assist with implementation drafts, tests, and docs.
 
 | Evidence | Commit and scope |
 | --- | --- |
-| **Recorded hosted run** | [CI 39410313726](https://github.com/redjadet/super_demo_android/actions/runs/39410313726) + [Emulator 39410313774](https://github.com/redjadet/super_demo_android/actions/runs/39410313774), **2026-10-20**, `303cea1` (AGP 9.4.1 / Gradle 9.8.2 / SDK 37). Prefer newest green tip after each push. |
+| **Recorded hosted run** | [CI 39414201683](https://github.com/redjadet/super_demo_android/actions/runs/39414201683) + [Emulator 39414201639](https://github.com/redjadet/super_demo_android/actions/runs/39414201639), **2026-10-20**, `0a9e434` (AGP 9.4.1 / Gradle 9.8.2 / SDK 37). Prefer newest green tip after each push. |
 | **Unit** | `./gradlew testDebugUnitTest` — repository (incl. concurrent bookmark race), ViewModel, Items, deep links, tablet breakpoint |
 | **Local full gate** | `./bin/checklist` — unit + assemble + lint + `connectedDebugAndroidTest` on a booted device/emulator |
 | **Hosted CI** | [`.github/workflows/ci.yml`](../.github/workflows/ci.yml) — unit, assembleDebug, lintDebug, assembleDebugAndroidTest |

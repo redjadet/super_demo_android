@@ -16,9 +16,9 @@ then `connectedDebugAndroidTest` on whatever device/emulator `adb` reports as
 | Connected | **7** tests, 0 failures (smoke + blank-title + offline Feed + missing deep-link) |
 | Device | `emulator-5554` (AVD `Small_Phone_3`, API 36 / Android 16) |
 | Result | **Checklist green** |
-| Tip SHA | [`303cea1`](https://github.com/redjadet/super_demo_android/commit/303cea1) |
-| Hosted unit CI | [run 39410313726](https://github.com/redjadet/super_demo_android/actions/runs/39410313726) |
-| Hosted emulator | [run 39410313774](https://github.com/redjadet/super_demo_android/actions/runs/39410313774) (API 34 `aosp_atd`) |
+| Tip SHA | [`0a9e434`](https://github.com/redjadet/super_demo_android/commit/0a9e434) |
+| Hosted unit CI | [run 39414201683](https://github.com/redjadet/super_demo_android/actions/runs/39414201683) |
+| Hosted emulator | [run 39414201639](https://github.com/redjadet/super_demo_android/actions/runs/39414201639) (API 34 `aosp_atd`) |
 
 ## Notes
 
