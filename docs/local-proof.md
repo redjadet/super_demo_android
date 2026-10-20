@@ -17,9 +17,9 @@ Hosted **CI** (`ci.yml`) runs unit/lint/assemble. Hosted **Emulator**
 | Device | `emulator-5554` (AVD `Small_Phone_3`, API 36 / Android 16) |
 | Result | **Checklist green** |
 
-| Tip SHA | *(this remaining-suggestions commit)* |
-| Hosted unit CI | Update after push — see Actions for tip SHA |
-| Hosted emulator | [`emulator.yml`](../.github/workflows/emulator.yml) — first green run after merge |
+| Tip SHA | [`6a55bdc`](https://github.com/redjadet/super_demo_android/commit/6a55bdc088803c58190a8873f44c4e8d0770e1d1) |
+| Hosted unit CI | Update Actions link after tip CI completes |
+| Hosted emulator | [`emulator.yml`](../.github/workflows/emulator.yml) — first green run after tip push |
 
 ## Notes
 
