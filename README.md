@@ -35,7 +35,7 @@ Toggle a bookmark while refresh is in flight: merge the **latest** Room
 bookmark map after the network returns, then replace posts inside one
 transaction so mid-flight toggles are not overwritten.
 [Problem, decision and regression](docs/EVIDENCE.md#lead-case-preserve-bookmark-toggles-during-refresh) ·
-[Passing CI · tip `73b52c9`](https://github.com/redjadet/super_demo_android/actions/runs/39405053930).
+[Passing CI · tip `495c8e9`](https://github.com/redjadet/super_demo_android/actions/runs/39407809001).
 
 **My contribution:** designed / reviewed / validated by me; AI-assisted
 implementation. [Responsibilities](docs/EVIDENCE.md#my-contribution).
