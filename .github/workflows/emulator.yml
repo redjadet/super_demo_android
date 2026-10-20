@@ -46,7 +46,7 @@ jobs:
           path: |
             ~/.android/avd/*
             ~/.android/adb*
-          key: avd-api34-${{ runner.os }}
+          key: avd-api34-aosp-atd-${{ runner.os }}
 
       - name: Create AVD and generate snapshot
         if: steps.avd-cache.outputs.cache-hit != 'true'
@@ -54,7 +54,8 @@ jobs:
         with:
           api-level: 34
           arch: x86_64
-          target: google_apis
+          # ATD images are lighter / more stable for instrumentation than google_apis.
+          target: aosp_atd
           force-avd-creation: false
           emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
           disable-animations: true
@@ -65,12 +66,15 @@ jobs:
         with:
           api-level: 34
           arch: x86_64
-          target: google_apis
+          target: aosp_atd
           force-avd-creation: false
           emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
           disable-animations: true
           script: |
             adb wait-for-device
+            adb shell settings put global window_animation_scale 0
+            adb shell settings put global transition_animation_scale 0
+            adb shell settings put global animator_duration_scale 0
             adb shell pm clear com.redjadet.superdemo.debug || true
             ./gradlew connectedDebugAndroidTest --stacktrace
 

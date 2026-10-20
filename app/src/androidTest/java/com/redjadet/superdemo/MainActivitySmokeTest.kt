@@ -6,6 +6,7 @@ import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
 import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
 import org.junit.Before
@@ -28,6 +29,9 @@ class MainActivitySmokeTest {
 
     @Test
     fun dashboard_isDefaultTab() {
+        composeRule.waitUntil(timeoutMillis = 15_000) {
+            composeRule.onAllNodesWithTag("dashboardHeadline").fetchSemanticsNodes().isNotEmpty()
+        }
         composeRule.onNodeWithTag("dashboardHeadline").assertIsDisplayed()
         composeRule.onNodeWithText("Android engineering portfolio").assertIsDisplayed()
         composeRule.onNodeWithTag("reviewerContentWidth").assertIsDisplayed()
@@ -68,7 +72,11 @@ class MainActivitySmokeTest {
 
     @Test
     fun dashboardRisks_navigatesToRisksList() {
-        composeRule.onNodeWithTag("dashboardRisksLink").performClick()
+        // Risks link sits below the fold on shorter hosted AVDs (API 34).
+        composeRule.waitUntil(timeoutMillis = 15_000) {
+            composeRule.onAllNodesWithTag("dashboardRisksLink").fetchSemanticsNodes().isNotEmpty()
+        }
+        composeRule.onNodeWithTag("dashboardRisksLink").performScrollTo().performClick()
         composeRule.onNodeWithTag("risksList").assertIsDisplayed()
         composeRule.onNodeWithText("Production risks").assertIsDisplayed()
     }

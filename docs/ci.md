@@ -21,7 +21,7 @@ On `push` / `pull_request` to `main`:
 
 ## Hosted emulator (`emulator.yml`)
 
-Runs connected instrumentation on API **34** (`google_apis` / x86_64) via
+Runs connected instrumentation on API **34** (`aosp_atd` / x86_64) via
 `reactivecircus/android-emulator-runner`. Clears `com.redjadet.superdemo.debug`
 before tests (same seed-once determinism as the local checklist).
 
