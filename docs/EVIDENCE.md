@@ -31,10 +31,11 @@ assist with implementation drafts, tests, and docs.
 
 | Evidence | Commit and scope |
 | --- | --- |
-| **Recorded hosted run** | [Main run 39389215172](https://github.com/redjadet/super_demo_android/actions/runs/39389215172), **2026-10-20**, `f75bea2`: unit tests, assembleDebug, lintDebug, assembleDebugAndroidTest. Emulator instrumentation is **not** in this lane. |
-| **Unit** | `./gradlew testDebugUnitTest` — repository (incl. concurrent bookmark race), ViewModel, Items, deep links |
+| **Recorded hosted run** | [CI 39396907199](https://github.com/redjadet/super_demo_android/actions/runs/39396907199) + [Emulator 39396907119](https://github.com/redjadet/super_demo_android/actions/runs/39396907119), **2026-10-20**, `36b22a9`. |
+| **Unit** | `./gradlew testDebugUnitTest` — repository (incl. concurrent bookmark race), ViewModel, Items, deep links, tablet breakpoint |
 | **Local full gate** | `./bin/checklist` — unit + assemble + lint + `connectedDebugAndroidTest` on a booted device/emulator |
-| **Hosted CI** | [`.github/workflows/ci.yml`](../.github/workflows/ci.yml) — unit, assembleDebug, lintDebug, assembleDebugAndroidTest. **Does not** run an emulator |
+| **Hosted CI** | [`.github/workflows/ci.yml`](../.github/workflows/ci.yml) — unit, assembleDebug, lintDebug, assembleDebugAndroidTest |
+| **Hosted emulator** | [`.github/workflows/emulator.yml`](../.github/workflows/emulator.yml) — `connectedDebugAndroidTest` on API 34 `aosp_atd` |
 | **Newer main runs** | [Actions · branch `main`](https://github.com/redjadet/super_demo_android/actions?query=branch%3Amain). Prefer the newest green tip after each push. |
 
 ## More engineering cases
