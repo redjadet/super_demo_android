@@ -68,7 +68,7 @@ class RoomItemRepository @Inject constructor(
             listOf(
                 "Room persistence" to "Local Items store with suspend DAO APIs.",
                 "UDF ViewModel" to "StateFlow UI state driven by Room Flow.",
-                "Reviewer demo seed" to "Seeded once; deleting all items does not re-seed.",
+                "Welcome to Items" to "Open an item to edit its title and notes. Your changes stay on this device.",
             ).forEach { (title, notes) ->
                 dao.insert(
                     ItemEntity(

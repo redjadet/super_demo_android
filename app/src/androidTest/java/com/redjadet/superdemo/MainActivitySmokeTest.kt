@@ -3,10 +3,13 @@ package com.redjadet.superdemo
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
+import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onAllNodesWithTag
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performTextReplacement
 import androidx.compose.ui.test.performScrollToNode
 import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
@@ -34,7 +37,7 @@ class MainActivitySmokeTest {
             composeRule.onAllNodesWithTag("dashboardHeadline").fetchSemanticsNodes().isNotEmpty()
         }
         composeRule.onNodeWithTag("dashboardHeadline").assertIsDisplayed()
-        composeRule.onNodeWithText("Android engineering portfolio").assertIsDisplayed()
+        composeRule.onNodeWithText("Offline by design").assertIsDisplayed()
         composeRule.onNodeWithTag("reviewerContentWidth").assertIsDisplayed()
     }
 
@@ -62,6 +65,29 @@ class MainActivitySmokeTest {
     }
 
     @Test
+    fun itemEdit_rejectsBlankTitle_thenSavesCorrectedTitle() {
+        composeRule.onNodeWithTag("itemsTab").performClick()
+        composeRule.onNodeWithTag("itemsDraft").performTextReplacement("Review flow item")
+        composeRule.onNodeWithTag("itemsAdd").performClick()
+        composeRule.waitUntil(timeoutMillis = 15_000) {
+            composeRule.onAllNodesWithText("Review flow item").fetchSemanticsNodes().isNotEmpty()
+        }
+        composeRule.onNodeWithText("Review flow item").performClick()
+        composeRule.onNodeWithTag("itemTitle").performTextReplacement("   ")
+        composeRule.onNodeWithTag("itemSave").performClick()
+        composeRule.onNodeWithTag("itemDetailSaveError").assertIsDisplayed()
+
+        composeRule.onNodeWithTag("itemTitle").performTextReplacement("Updated review item")
+        composeRule.onNodeWithTag("itemSave").performClick()
+        composeRule.waitUntil(timeoutMillis = 5_000) {
+            composeRule.onAllNodesWithText("Saved").fetchSemanticsNodes().isNotEmpty()
+        }
+        composeRule.onNodeWithContentDescription("Back").performClick()
+        composeRule.onNodeWithText("Updated review item").assertIsDisplayed()
+        composeRule.onNodeWithContentDescription("Delete item: Updated review item").performClick()
+    }
+
+    @Test
     fun feedTab_showsListOrLoading() {
         composeRule.onNodeWithTag("feedTab").performClick()
         composeRule.waitUntil(timeoutMillis = 15_000) {
@@ -81,6 +107,6 @@ class MainActivitySmokeTest {
             .performScrollToNode(hasTestTag("dashboardRisksLink"))
         composeRule.onNodeWithTag("dashboardRisksLink").performClick()
         composeRule.onNodeWithTag("risksList").assertIsDisplayed()
-        composeRule.onNodeWithText("Production risks").assertIsDisplayed()
+        composeRule.onNodeWithText("Demo scope").assertIsDisplayed()
     }
 }

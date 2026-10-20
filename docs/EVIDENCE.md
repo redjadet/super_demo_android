@@ -17,9 +17,9 @@ overwrite the newer local intent when remote posts arrive.
 | **Related** | `refresh_writesRemoteIntoCacheTransactionally`, `refresh_returnsLocalCacheWhenRemoteFails`, `toggleBookmark_isAtomic`. |
 | **Implementation** | [`CachingFeedRepository.kt`](../app/src/main/java/com/redjadet/superdemo/features/feed/data/CachingFeedRepository.kt) · [`FeedViewModel.kt`](../app/src/main/java/com/redjadet/superdemo/features/feed/presentation/FeedViewModel.kt). |
 
-**Trade-off:** iOS proves a durable **outbox** race with remote bookmark sync.
-Android proves transactional local merge + Room SoT without claiming a sync
-engine. Honesty: [production risks](portfolio.md#honesty).
+**Trade-off:** bookmarks remain local to this device. The remote API supplies
+posts; it does not synchronize bookmark intent across devices. See
+[demo scope](portfolio.md#demo-scope).
 
 ## My contribution
 
@@ -31,12 +31,12 @@ assist with implementation drafts, tests, and docs.
 
 | Evidence | Commit and scope |
 | --- | --- |
-| **Recorded hosted run** | [CI 39414201683](https://github.com/redjadet/super_demo_android/actions/runs/39414201683) + [Emulator 39414201639](https://github.com/redjadet/super_demo_android/actions/runs/39414201639), **2026-10-20**, `0a9e434` (AGP 9.4.1 / Gradle 9.8.2 / SDK 37). Prefer newest green tip after each push. |
+| **Recorded hosted run** | [CI 39414201683](https://github.com/redjadet/super_demo_android/actions/runs/39414201683) + [Emulator 39414201639](https://github.com/redjadet/super_demo_android/actions/runs/39414201639), **2026-10-20**, `0a9e434` (AGP 9.4.1 / Gradle 9.8.2 / SDK 37). This is a recorded baseline; branch checks validate later changes. |
 | **Unit** | `./gradlew testDebugUnitTest` — repository (incl. concurrent bookmark race), ViewModel, Items, deep links, tablet breakpoint |
 | **Local full gate** | `./bin/checklist` — unit + assemble + lint + `connectedDebugAndroidTest` on a booted device/emulator |
 | **Hosted CI** | [`.github/workflows/ci.yml`](../.github/workflows/ci.yml) — unit, assembleDebug, lintDebug, assembleDebugAndroidTest |
 | **Hosted emulator** | [`.github/workflows/emulator.yml`](../.github/workflows/emulator.yml) — `connectedDebugAndroidTest` on API 34 `aosp_atd` |
-| **Newer main runs** | [Actions · branch `main`](https://github.com/redjadet/super_demo_android/actions?query=branch%3Amain). Prefer the newest green tip after each push. |
+| **Newer main runs** | [Actions · branch `main`](https://github.com/redjadet/super_demo_android/actions?query=branch%3Amain). Check the commit SHA when using a run as evidence. |
 
 ## More engineering cases
 
@@ -64,7 +64,15 @@ assist with implementation drafts, tests, and docs.
 | **Decision** | After Feed finishes loading, navigate to detail; detail shows “Post not found.” (`feedPostMissing`). |
 | **Proof** | `FeedDeepLinkInstrumentationTest.warmDeepLink_missingPost_showsNotFoundDetail` |
 
-### 4. Items one-time seed + Room Flow
+### 4. Item edit validation
+
+Blank edits must not erase an existing title. `ItemDetailViewModelTest`
+reproduces the missing validation, checks that the stored item stays unchanged,
+then verifies that a corrected edit saves and clears the error.
+`MainActivitySmokeTest.itemEdit_rejectsBlankTitle_thenSavesCorrectedTitle` exercises
+the same recovery through the Compose form and confirms the list receives the edit.
+
+### 5. Items one-time seed + Room Flow
 
 | Evidence | Inspect |
 | --- | --- |
@@ -76,7 +84,7 @@ assist with implementation drafts, tests, and docs.
 
 ```bash
 cd /path/to/super_demo_android
-export JAVA_HOME="${JAVA_HOME:-$(/usr/libexec/java_home -v 21 2>/dev/null)}"
+export JAVA_HOME="$(/usr/libexec/java_home -v 21)"
 export ANDROID_HOME="${ANDROID_HOME:-$HOME/Library/Android/sdk}"
 export PATH="$JAVA_HOME/bin:$ANDROID_HOME/platform-tools:$ANDROID_HOME/emulator:$PATH"
 

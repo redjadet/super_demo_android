@@ -14,8 +14,6 @@ android {
     defaultConfig {
         applicationId = "com.redjadet.superdemo"
         minSdk = 26
-        // API 37 (Android 16): reviewed via SDK Upgrade Assistant guidance; portfolio
-        // sample has no edge-to-edge / photo-picker / background-restriction special cases.
         targetSdk = 37
         versionCode = 1
         versionName = "1.0.0"

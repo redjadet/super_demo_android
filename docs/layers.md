@@ -22,5 +22,5 @@ use cases and binds repositories in `core/di` (`AppModule` + `RepositoryBindings
 | Feature | Why it is a reference |
 | --- | --- |
 | **Items** | Simplest Room CRUD + seed |
-| **Feed** | Offline-first cache, remote sync, stale honesty |
+| **Feed** | Offline-first cache, remote sync, refresh failure fallback |
 | **Dashboard** | Local portfolio metrics + risks route |

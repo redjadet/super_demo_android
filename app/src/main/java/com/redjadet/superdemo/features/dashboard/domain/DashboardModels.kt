@@ -1,17 +1,10 @@
 package com.redjadet.superdemo.features.dashboard.domain
 
-data class ReadinessMetric(
+data class DemoCapability(
     val id: String,
     val title: String,
-    val status: ReadinessStatus,
     val detail: String,
 )
-
-enum class ReadinessStatus {
-    Ready,
-    Partial,
-    Risk,
-}
 
 data class EngineeringDemo(
     val id: String,
@@ -21,7 +14,7 @@ data class EngineeringDemo(
 
 data class DashboardSnapshot(
     val headline: String,
-    val metrics: List<ReadinessMetric>,
+    val capabilities: List<DemoCapability>,
     val demos: List<EngineeringDemo>,
     val risks: List<String>,
 )

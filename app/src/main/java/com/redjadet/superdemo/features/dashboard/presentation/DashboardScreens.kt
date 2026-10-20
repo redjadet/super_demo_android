@@ -1,11 +1,9 @@
 package com.redjadet.superdemo.features.dashboard.presentation
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -33,9 +31,8 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.redjadet.superdemo.app.ui.ReviewerContentWidth
+import com.redjadet.superdemo.features.dashboard.domain.DemoCapability
 import com.redjadet.superdemo.features.dashboard.domain.EngineeringDemo
-import com.redjadet.superdemo.features.dashboard.domain.ReadinessMetric
-import com.redjadet.superdemo.features.dashboard.domain.ReadinessStatus
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -47,144 +44,99 @@ fun DashboardRoute(
     val snapshot = state.snapshot
 
     Scaffold(
-        topBar = { TopAppBar(title = { Text("Dashboard") }) },
+        topBar = { TopAppBar(title = { Text("Super Demo") }) },
     ) { padding ->
         ReviewerContentWidth(modifier = Modifier.padding(padding)) {
-        if (snapshot == null) {
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center,
-            ) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text(
-                        text = state.errorMessage ?: "Loading…",
-                        modifier = Modifier.testTag("dashboardStatus"),
-                    )
-                    if (state.errorMessage != null) {
-                        TextButton(
-                            onClick = viewModel::refresh,
-                            modifier = Modifier
-                                .padding(top = 12.dp)
-                                .testTag("dashboardRetry"),
-                        ) {
-                            Text("Retry")
+            if (snapshot == null) {
+                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text(
+                            text = state.errorMessage ?: "Loading…",
+                            modifier = Modifier.testTag("dashboardStatus"),
+                        )
+                        if (state.errorMessage != null) {
+                            TextButton(
+                                onClick = viewModel::refresh,
+                                modifier = Modifier.testTag("dashboardRetry"),
+                            ) {
+                                Text("Retry")
+                            }
                         }
                     }
                 }
+                return@ReviewerContentWidth
             }
-            return@ReviewerContentWidth
-        }
 
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .testTag("dashboardList"),
-            contentPadding = PaddingValues(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-        ) {
-            item {
-                Text(
-                    text = snapshot.headline,
-                    style = MaterialTheme.typography.headlineMedium,
-                    modifier = Modifier.testTag("dashboardHeadline"),
-                )
-                Text(
-                    text = "Kotlin · Jetpack Compose · Material 3 · offline-first Feed",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(top = 6.dp),
-                )
-            }
-            // Keep above the fold on short hosted AVDs (API 34).
-            item {
-                TextButton(
-                    onClick = onOpenRisks,
-                    modifier = Modifier.testTag("dashboardRisksLink"),
-                ) {
-                    Text("Production risks")
-                    Icon(
-                        Icons.AutoMirrored.Filled.ArrowForward,
-                        contentDescription = null,
-                        modifier = Modifier.padding(start = 4.dp),
-                    )
+            LazyColumn(
+                modifier = Modifier.fillMaxSize().testTag("dashboardList"),
+                contentPadding = PaddingValues(20.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+            ) {
+                item {
+                    Surface(
+                        color = MaterialTheme.colorScheme.primaryContainer,
+                        contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                        shape = RoundedCornerShape(24.dp),
+                        modifier = Modifier.fillMaxWidth(),
+                    ) {
+                        Column(Modifier.padding(20.dp)) {
+                            Text("ANDROID ENGINEERING DEMO", style = MaterialTheme.typography.labelMedium)
+                            Text(
+                                text = snapshot.headline,
+                                style = MaterialTheme.typography.headlineLarge,
+                                modifier = Modifier.padding(top = 12.dp).testTag("dashboardHeadline"),
+                            )
+                            Text(
+                                text = "A small app built around reliable local data. Explore Feed and Items to see it in action.",
+                                style = MaterialTheme.typography.bodyLarge,
+                                modifier = Modifier.padding(top = 8.dp),
+                            )
+                        }
+                    }
                 }
-            }
-            item {
-                Text("Release health", style = MaterialTheme.typography.titleLarge)
-            }
-            items(snapshot.metrics, key = ReadinessMetric::id) { metric ->
-                MetricRow(metric)
-            }
-            item {
-                Text("Engineering demos", style = MaterialTheme.typography.titleLarge)
-            }
-            items(snapshot.demos, key = EngineeringDemo::id) { demo ->
-                Surface(
-                    tonalElevation = 1.dp,
-                    shape = RoundedCornerShape(12.dp),
-                    modifier = Modifier.fillMaxWidth(),
-                ) {
-                    Column(modifier = Modifier.padding(14.dp)) {
-                        Text(demo.title, style = MaterialTheme.typography.titleMedium)
-                        Text(
-                            text = demo.summary,
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.padding(top = 4.dp),
+                item {
+                    TextButton(
+                        onClick = onOpenRisks,
+                        modifier = Modifier.testTag("dashboardRisksLink"),
+                    ) {
+                        Text("Demo scope")
+                        Icon(
+                            Icons.AutoMirrored.Filled.ArrowForward,
+                            contentDescription = null,
+                            modifier = Modifier.padding(start = 8.dp),
                         )
                     }
                 }
+                item { Text("Explore the demo", style = MaterialTheme.typography.titleLarge) }
+                items(snapshot.capabilities, key = DemoCapability::id) { capability ->
+                    InfoCard(capability.title, capability.detail)
+                }
+                item { Text("Try it yourself", style = MaterialTheme.typography.titleLarge) }
+                items(snapshot.demos, key = EngineeringDemo::id) { demo ->
+                    InfoCard(demo.title, demo.summary)
+                }
             }
-        }
         }
     }
 }
 
 @Composable
-private fun MetricRow(metric: ReadinessMetric) {
+private fun InfoCard(title: String, detail: String) {
     Surface(
-        tonalElevation = 1.dp,
-        shape = RoundedCornerShape(12.dp),
-        modifier = Modifier
-            .fillMaxWidth()
-            .testTag("metric_${metric.id}"),
+        color = MaterialTheme.colorScheme.surfaceContainerLow,
+        shape = RoundedCornerShape(16.dp),
+        modifier = Modifier.fillMaxWidth(),
     ) {
-        Row(
-            modifier = Modifier.padding(14.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            StatusChip(metric.status)
-            Column(modifier = Modifier.padding(start = 12.dp)) {
-                Text(metric.title, style = MaterialTheme.typography.titleMedium)
-                Text(
-                    text = metric.detail,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
+        Column(Modifier.padding(16.dp)) {
+            Text(title, style = MaterialTheme.typography.titleMedium)
+            Text(
+                text = detail,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(top = 6.dp),
+            )
         }
     }
-}
-
-@Composable
-private fun StatusChip(status: ReadinessStatus) {
-    val label = when (status) {
-        ReadinessStatus.Ready -> "Ready"
-        ReadinessStatus.Partial -> "Partial"
-        ReadinessStatus.Risk -> "Risk"
-    }
-    val color = when (status) {
-        ReadinessStatus.Ready -> MaterialTheme.colorScheme.primaryContainer
-        ReadinessStatus.Partial -> MaterialTheme.colorScheme.secondaryContainer
-        ReadinessStatus.Risk -> MaterialTheme.colorScheme.errorContainer
-    }
-    Text(
-        text = label,
-        style = MaterialTheme.typography.labelLarge,
-        modifier = Modifier
-            .background(color, RoundedCornerShape(999.dp))
-            .padding(horizontal = 10.dp, vertical = 6.dp),
-    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -199,7 +151,7 @@ fun ProductionRisksRoute(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Production risks") },
+                title = { Text("Demo scope") },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
@@ -208,31 +160,28 @@ fun ProductionRisksRoute(
             )
         },
     ) { padding ->
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-                .testTag("risksList"),
-            contentPadding = PaddingValues(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
-        ) {
-            item {
-                Text(
-                    text = "Honest boundaries for this portfolio sample.",
-                    style = MaterialTheme.typography.bodyLarge,
-                )
-            }
-            items(risks) { risk ->
-                Surface(
-                    tonalElevation = 1.dp,
-                    shape = RoundedCornerShape(12.dp),
-                    modifier = Modifier.fillMaxWidth(),
-                ) {
+        ReviewerContentWidth(modifier = Modifier.padding(padding)) {
+            LazyColumn(
+                modifier = Modifier.fillMaxSize().testTag("risksList"),
+                contentPadding = PaddingValues(20.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+            ) {
+                item {
+                    Text("Built to explore", style = MaterialTheme.typography.headlineMedium)
                     Text(
-                        text = risk,
-                        style = MaterialTheme.typography.bodyMedium,
-                        modifier = Modifier.padding(14.dp),
+                        text = "This demo focuses on local persistence, offline reading and predictable navigation.",
+                        style = MaterialTheme.typography.bodyLarge,
+                        modifier = Modifier.padding(top = 8.dp),
                     )
+                }
+                items(risks) { risk ->
+                    Surface(
+                        color = MaterialTheme.colorScheme.surfaceContainerLow,
+                        shape = RoundedCornerShape(16.dp),
+                        modifier = Modifier.fillMaxWidth(),
+                    ) {
+                        Text(risk, style = MaterialTheme.typography.bodyMedium, modifier = Modifier.padding(16.dp))
+                    }
                 }
             }
         }

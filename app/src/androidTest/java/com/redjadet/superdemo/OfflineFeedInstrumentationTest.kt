@@ -43,7 +43,7 @@ class OfflineFeedInstrumentationTest {
         }
         composeRule.onNodeWithTag("feedStaleBanner").assertIsDisplayed()
         composeRule
-            .onNodeWithText("Offline / sync failed — showing local Room cache.")
+            .onNodeWithText("Couldn’t refresh. Showing saved posts.")
             .assertIsDisplayed()
     }
 }

@@ -6,7 +6,7 @@ Short router for reviewers and agents. Detail lives under [`docs/`](docs/README.
 | --- | --- |
 | Overview / run / screenshots | [`README.md`](README.md) |
 | Evidence (lead case) | [`docs/EVIDENCE.md`](docs/EVIDENCE.md) |
-| Portfolio / honesty | [`docs/portfolio.md`](docs/portfolio.md) |
+| Demo / review guide | [`docs/portfolio.md`](docs/portfolio.md) |
 | Architecture tour | [`docs/architecture-tour.md`](docs/architecture-tour.md) |
 | Offline-first | [`docs/offline-first.md`](docs/offline-first.md) |
 | Testing / checklist | [`docs/testing.md`](docs/testing.md), [`bin/checklist`](bin/checklist) |

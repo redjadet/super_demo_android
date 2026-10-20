@@ -7,11 +7,11 @@
 | URL | Behavior |
 | --- | --- |
 | `superdemo://dashboard` | Dashboard tab |
-| `superdemo://dashboard/risks` | Production risks screen |
+| `superdemo://dashboard/risks` | Demo scope screen (route retained) |
 | `superdemo://items` | Items tab |
 | `superdemo://feed` | Feed tab |
 | `superdemo://feed/<id>` | Feed tab + post detail when present |
 
 ```bash
-adb shell am start -a android.intent.action.VIEW -d "superdemo://feed/1"
+adb shell am start -a android.intent.action.VIEW -d "superdemo://feed/1" -p com.redjadet.superdemo.debug
 ```

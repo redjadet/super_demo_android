@@ -1,37 +1,57 @@
 # Build and run
 
-## Tooling
+## Prerequisites
 
-Requires JDK 17+ (21 recommended) and an Android SDK with platform-tools + an AVD
-or device.
+- JDK 21, matching the CI toolchain.
+- Android SDK with platform **37** and platform-tools. Gradle resolves the build
+  tools required by the Android plugin.
+- Emulator or device running **API 26+** for installation and connected tests.
+
+Open the repository root in Android Studio, select JDK 21 as the Gradle JDK,
+install the required SDK platform and run the `app` configuration.
+
+## Command line
+
+Set `JAVA_HOME` to JDK 21 and `ANDROID_HOME` to your SDK directory. On macOS:
 
 ```bash
-export JAVA_HOME="${JAVA_HOME:-$(/usr/libexec/java_home -v 21 2>/dev/null)}"
-export ANDROID_HOME="${ANDROID_HOME:-$HOME/Library/Android/sdk}"
+export JAVA_HOME="$(/usr/libexec/java_home -v 21)"
+export ANDROID_HOME="$HOME/Library/Android/sdk"
 export PATH="$JAVA_HOME/bin:$ANDROID_HOME/platform-tools:$ANDROID_HOME/emulator:$PATH"
-cd /path/to/super_demo_android
 ```
 
-`local.properties` should contain `sdk.dir` (gitignored).
+On other hosts, use the equivalent local JDK and SDK paths. An ignored
+`local.properties` file with `sdk.dir` is also supported.
 
-## Gradle
+From the repository root:
 
 ```bash
 ./gradlew :app:assembleDebug
 ./gradlew testDebugUnitTest
 ./gradlew :app:installDebug
+adb shell am start -n com.redjadet.superdemo.debug/com.redjadet.superdemo.MainActivity
 ```
 
-## Emulator / device
+Debug builds install as `com.redjadet.superdemo.debug`. Release builds use
+`com.redjadet.superdemo`.
 
-Boot any AVD (or attach a device), then:
+## Device selection and full validation
 
 ```bash
-adb wait-for-device
-adb shell getprop sys.boot_completed   # expect 1
+adb devices -l
+export ANDROID_SERIAL=emulator-5554  # replace with the chosen serial
+adb -s "$ANDROID_SERIAL" shell getprop sys.boot_completed  # expect 1
 ./bin/checklist
 ```
 
-Optional: `export ANDROID_SERIAL=emulator-5554` to pin a device.
+The checklist clears the debug app’s local data before instrumentation to make
+seeded test state deterministic. Use a test device or emulator.
 
-Android Studio: open the project root and run the `app` configuration.
+## Try a deep link
+
+```bash
+adb shell am start -a android.intent.action.VIEW -d "superdemo://feed/1" -p com.redjadet.superdemo.debug
+```
+
+See [navigation](navigation.md) for supported routes and [testing](testing.md) for
+the checks behind each behavior.
