@@ -2,6 +2,7 @@ package com.redjadet.superdemo
 
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -35,7 +36,12 @@ class MainActivitySmokeTest {
     fun itemsTab_showsSeededListAndDraftField() {
         composeRule.onNodeWithTag("itemsTab").performClick()
         composeRule.onNodeWithTag("itemsDraft").assertIsDisplayed()
+        // Wait for seed + Room Flow to settle (loading → list).
+        composeRule.waitUntil(timeoutMillis = 15_000) {
+            composeRule.onAllNodesWithTag("itemsList").fetchSemanticsNodes().isNotEmpty()
+        }
         composeRule.onNodeWithTag("itemsList").assertIsDisplayed()
+        composeRule.onNodeWithText("Room persistence", substring = true).assertIsDisplayed()
     }
 
     @Test

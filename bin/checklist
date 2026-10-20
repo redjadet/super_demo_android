@@ -19,6 +19,15 @@ echo "==> Android Lint"
 ./gradlew :app:lintDebug --stacktrace
 
 if adb devices | grep -E 'emulator-[0-9]+\s+device' >/dev/null; then
+  # Fresh install state so Items seed-once + Feed Room seed are deterministic on a reused AVD.
+  # Debug builds use applicationIdSuffix ".debug" (see app/build.gradle.kts).
+  DEBUG_APP_ID="com.redjadet.superdemo.debug"
+  echo "==> Clear app data for instrumentation ($DEBUG_APP_ID)"
+  if adb shell pm path "$DEBUG_APP_ID" >/dev/null 2>&1; then
+    adb shell pm clear "$DEBUG_APP_ID"
+  else
+    echo "    (package not installed yet; connectedDebugAndroidTest will install)"
+  fi
   echo "==> Connected instrumentation (emulator present)"
   ./gradlew connectedDebugAndroidTest --stacktrace
 else

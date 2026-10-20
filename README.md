@@ -43,7 +43,8 @@ Author: [İlker Sevim](https://redjadet.github.io/react-web-portfolio/).
 Toggle a bookmark while refresh is in flight: merge the **latest** Room
 bookmark map after the network returns, then replace posts inside one
 transaction so mid-flight toggles are not overwritten.
-[Problem, decision and regression](docs/EVIDENCE.md#lead-case-preserve-bookmark-toggles-during-refresh).
+[Problem, decision and regression](docs/EVIDENCE.md#lead-case-preserve-bookmark-toggles-during-refresh) ·
+[Passing unit job · 2026-10-20](https://github.com/redjadet/super_demo_android/actions/runs/39382399129/job/118494406457).
 
 **My contribution:** architecture, intent, and edge cases; acceptance criteria;
 review of failure paths; unit + emulator validation. Agents assist with typing

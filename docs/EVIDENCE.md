@@ -14,6 +14,7 @@ overwrite the newer local intent when remote posts arrive.
 | --- | --- |
 | **Design decision** | Keep Feed posts **Room-driven** via `Flow`. After the network returns, read the latest bookmark map **inside** the same `withTransaction` as `clear` + `upsert` so a toggle after the response cannot race the replace. Propagate `CancellationException` (no stale success). Bookmarks are **local-only** in this Android sample (no outbox / remote bookmark API). |
 | **Regression** | `CachingFeedRepositoryTest.refresh_preservesBookmarkToggledDuringNetworkWait` toggles id `1` inside the fake remote call and asserts the merged row keeps the mid-flight value. |
+| **Passing run** | [Unit · lint · assemble job](https://github.com/redjadet/super_demo_android/actions/runs/39382399129/job/118494406457) on **2026-10-20** at [`b13bebf`](https://github.com/redjadet/super_demo_android/commit/b13bebf727e346a33d485154ba4710358e029bbd). Full [CI run](https://github.com/redjadet/super_demo_android/actions/runs/39382399129) also passed. Hosted CI does **not** run a connected emulator; local proof is [`./bin/checklist`](../bin/checklist). |
 | **Related** | `refresh_writesRemoteIntoCacheTransactionally`, `refresh_returnsLocalCacheWhenRemoteFails`, `toggleBookmark_isAtomic`. |
 | **Implementation** | [`CachingFeedRepository.kt`](../app/src/main/java/com/redjadet/superdemo/features/feed/data/CachingFeedRepository.kt) · [`FeedViewModel.kt`](../app/src/main/java/com/redjadet/superdemo/features/feed/presentation/FeedViewModel.kt). |
 
@@ -36,11 +37,13 @@ change. Cursor / Codex assist with implementation drafts, tests, and docs.
 
 ## Verification and proof scope
 
-| Evidence | Scope |
+| Evidence | Commit and scope |
 | --- | --- |
+| **Recorded hosted run** | [Main run 39382399129](https://github.com/redjadet/super_demo_android/actions/runs/39382399129), **2026-10-20**, `b13bebf`: unit tests, assembleDebug, lintDebug, assembleDebugAndroidTest. Emulator instrumentation is **not** in this lane. |
 | **Unit** | `./gradlew testDebugUnitTest` — repository, ViewModel, Items, deep links |
 | **Local full gate** | `./bin/checklist` — unit + assemble + lint + `connectedDebugAndroidTest` on AVD `Small_Phone_3` |
 | **Hosted CI** | [`.github/workflows/ci.yml`](../.github/workflows/ci.yml) — unit, assembleDebug, lintDebug, assembleDebugAndroidTest. **Does not** run an emulator |
+| **Newer main runs** | [Actions · branch `main`](https://github.com/redjadet/super_demo_android/actions?query=branch%3Amain). Check each run's commit and jobs before treating it as runtime proof. |
 
 ## More engineering cases
 

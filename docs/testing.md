@@ -23,6 +23,10 @@ Hilt test runner: `com.redjadet.superdemo.HiltTestRunner`.
 Espresso / AndroidX Test alphas (`espresso-core` 3.8.0-alpha01) are pinned because
 stable Espresso 3.6/3.7 still calls removed `InputManager.getInstance()` on API 36.
 
+`./bin/checklist` clears **`com.redjadet.superdemo.debug`** (debug `applicationIdSuffix`)
+before connected tests so Items seed-once leftovers on a reused AVD do not flake
+the Items smoke test.
+
 ## Commands
 
 See [build-and-run.md](build-and-run.md).
