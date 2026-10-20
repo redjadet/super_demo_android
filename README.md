@@ -2,7 +2,8 @@
 
 [![CI](https://github.com/redjadet/super_demo_android/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/redjadet/super_demo_android/actions/workflows/ci.yml)
 [![Emulator](https://github.com/redjadet/super_demo_android/actions/workflows/emulator.yml/badge.svg?branch=main)](https://github.com/redjadet/super_demo_android/actions/workflows/emulator.yml)
-![Kotlin](https://img.shields.io/badge/Kotlin-2.1.20-7F52FF?logo=kotlin&logoColor=white)
+![Kotlin](https://img.shields.io/badge/Kotlin-2.2.10-7F52FF?logo=kotlin&logoColor=white)
+![AGP](https://img.shields.io/badge/AGP-9.3.3-3DDC84?logo=android&logoColor=white)
 ![Compose](https://img.shields.io/badge/Jetpack%20Compose-BOM%202025.04.01-4285F4?logo=jetpackcompose&logoColor=white)
 ![Room](https://img.shields.io/badge/Room-source%20of%20truth-4285F4?logo=android&logoColor=white)
 ![Hilt](https://img.shields.io/badge/DI-Hilt-8E44AD)

@@ -1,6 +1,6 @@
 plugins {
     alias(libs.plugins.android.application)
-    alias(libs.plugins.kotlin.android)
+    // AGP 9 built-in Kotlin — do not apply org.jetbrains.kotlin.android.
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.ksp)
@@ -40,10 +40,6 @@ android {
         targetCompatibility = JavaVersion.VERSION_17
     }
 
-    kotlinOptions {
-        jvmTarget = "17"
-    }
-
     buildFeatures {
         compose = true
         buildConfig = true
@@ -65,6 +61,9 @@ android {
         abortOnError = true
     }
 }
+
+// jvmTarget defaults to compileOptions.targetCompatibility with built-in Kotlin.
+// Keep an explicit compilerOptions block only if we add freeCompilerArgs later.
 
 dependencies {
     implementation(libs.androidx.core.ktx)
