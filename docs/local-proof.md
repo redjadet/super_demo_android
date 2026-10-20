@@ -19,9 +19,11 @@ then `connectedDebugAndroidTest` on whatever device/emulator `adb` reports as
 | Android Lint | 0 errors; 6 dependency-update warnings (`NewerVersionAvailable`) |
 | Result | **Checklist green** |
 | Validated source | [`7e7c3d9`](https://github.com/redjadet/super_demo_android/commit/7e7c3d9) |
+| Hosted unit CI | [run 39417272605](https://github.com/redjadet/super_demo_android/actions/runs/39417272605) at `2d09e86` |
+| Hosted emulator | [run 39417272616](https://github.com/redjadet/super_demo_android/actions/runs/39417272616) at `2d09e86`; 8 connected tests on API 34 `aosp_atd` |
 
 The source commit contains the app, tests and screenshot updates. Later
-documentation-only commits do not change that runtime evidence. Hosted API 34
+documentation and CI-action updates do not change that runtime evidence. Hosted API 34
 results are recorded separately in [Engineering evidence](EVIDENCE.md).
 
 ## Manual presentation checks
