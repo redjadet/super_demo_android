@@ -76,17 +76,9 @@ class MainActivitySmokeTest {
         composeRule.waitUntil(timeoutMillis = 15_000) {
             composeRule.onAllNodesWithTag("dashboardList").fetchSemanticsNodes().isNotEmpty()
         }
-        // LazyColumn does not compose off-screen items; swipe until the link exists.
-        var composed = false
-        repeat(10) {
-            if (composeRule.onAllNodesWithTag("dashboardRisksLink").fetchSemanticsNodes().isNotEmpty()) {
-                composed = true
-                return@repeat
-            }
-            composeRule.onNodeWithTag("dashboardList").performTouchInput { swipeUp() }
-            composeRule.waitForIdle()
-        }
-        assertTrue("dashboardRisksLink not composed after scrolling dashboardList", composed)
+        composeRule
+            .onNodeWithTag("dashboardList")
+            .performScrollToNode(hasTestTag("dashboardRisksLink"))
         composeRule.onNodeWithTag("dashboardRisksLink").performClick()
         composeRule.onNodeWithTag("risksList").assertIsDisplayed()
         composeRule.onNodeWithText("Production risks").assertIsDisplayed()
