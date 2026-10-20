@@ -1,7 +1,8 @@
 # super_demo_android
 
 [![3-minute path](https://img.shields.io/badge/3--minute-reviewer%20path-3DDC84)](docs/portfolio.md#3-minute-path)
-[![Architecture](https://img.shields.io/badge/Architecture-tour-0A7A3E)](docs/architecture.md)
+[![Evidence](https://img.shields.io/badge/Evidence-technical%20reviewer-3DDC84)](docs/EVIDENCE.md)
+[![Architecture tour](https://img.shields.io/badge/Architecture-tour-0A7A3E)](docs/architecture-tour.md)
 [![Offline-first](https://img.shields.io/badge/Data-Offline--first-16A34A)](docs/offline-first.md)
 [![Testing](https://img.shields.io/badge/Testing-Unit%20%7C%20Instrumentation-2E7D32)](docs/testing.md)
 [![Local gate](https://img.shields.io/badge/Gate-%2Fbin%2Fchecklist-1B5E20)](bin/checklist)
@@ -24,69 +25,35 @@
 ![Architecture](https://img.shields.io/badge/Architecture-Clean%20layers%20%7C%20UDF-0A7A3E)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-Kotlin / Jetpack Compose portfolio demo mirroring the structure of
-[super_demo_ios](https://github.com/redjadet/super_demo_ios): **Dashboard**,
-**Items**, and **Feed** tabs with clean layers, offline-capable Feed caching,
-Room-backed Items, Navigation Compose, and Hilt DI.
+A **Kotlin / Jetpack Compose / Room** engineering portfolio demo — the Android
+sibling of [super_demo_ios](https://github.com/redjadet/super_demo_ios). It shows
+clean feature layers, offline-first Feed caching, Room-backed Items CRUD,
+Navigation Compose deep links, and Hilt DI with UDF ViewModels.
 
-This is a portfolio sample, not a Play Store product. CI runs unit tests,
-assemble, lint, and androidTest compile; connected emulator proof is local via
-[`./bin/checklist`](bin/checklist).
+This is a portfolio sample, **not** a Play Store product. Hosted CI runs unit
+tests, assemble, lint, and androidTest compile; connected emulator proof is
+local via [`./bin/checklist`](bin/checklist).
 
 Author: [İlker Sevim](https://redjadet.github.io/react-web-portfolio/).
 
-**Docs:** [CODEMAP](CODEMAP.md) · [docs/](docs/README.md) · [architecture](docs/architecture.md) · [offline-first](docs/offline-first.md) · [testing](docs/testing.md) · [build/run](docs/build-and-run.md) · [portfolio map](docs/portfolio.md)
+## Engineering decisions and evidence
 
-## Offline-first (required)
+### Bookmark toggle during Feed refresh
 
-Room is the **local source of truth** for Feed and Items. Core tabs must open and
-remain usable with no network:
+Toggle a bookmark while refresh is in flight: merge the **latest** Room
+bookmark map after the network returns, then replace posts inside one
+transaction so mid-flight toggles are not overwritten.
+[Problem, decision and regression](docs/EVIDENCE.md#lead-case-preserve-bookmark-toggles-during-refresh).
 
-1. **Seed locally** on first launch (`OfflineFeedSeed` for Feed, Room seed for Items).
-2. **Observe Room** via `Flow` in the Feed ViewModel — UI binds to local data first.
-3. **Sync when online** through `FeedRepository.refresh()` (JSONPlaceholder). On
-   success, Room is replaced with remote posts (bookmarks preserved by id).
-4. **Degrade gracefully offline** — remote failures return the local cache with
-   `isStale` / `fromCache` so the UI shows a stale banner instead of a hard error.
-5. **Dashboard** is fully local sample data (no network dependency).
+**My contribution:** architecture, intent, and edge cases; acceptance criteria;
+review of failure paths; unit + emulator validation. Agents assist with typing
+and syntax. [Responsibilities](docs/EVIDENCE.md#my-contribution).
 
-Airplane-mode check: open Feed → list + banner still render; Items CRUD still works.
+- [Architecture tour](docs/architecture-tour.md) — layers, DI, Feed/Items paths
+- [Offline-first](docs/offline-first.md) — Room SoT, stale honesty
+- [Portfolio / reviewer map](docs/portfolio.md) — 3-minute path and honesty table
 
-## Stack
-
-| Area | Choice |
-| --- | --- |
-| Language | Kotlin 2.1 |
-| UI | Jetpack Compose + Material 3 |
-| Architecture | Single-Activity, UDF ViewModels, feature folders (domain / data / presentation) |
-| Offline | Room source of truth + optional remote sync |
-| Navigation | Navigation Compose + bottom tabs + `superdemo://` deep links |
-| DI | Hilt |
-| Async | Coroutines + Flow / StateFlow |
-| Persistence | Room (Feed cache + Items) |
-| Networking | Retrofit + OkHttp + kotlinx.serialization (JSONPlaceholder) |
-| Build | Gradle Kotlin DSL + version catalog |
-| SDK | `minSdk 26`, `targetSdk` / `compileSdk` 36 |
-
-## Screens vs iOS reference
-
-| iOS (`super_demo_ios`) | Android (this repo) |
-| --- | --- |
-| Tab: Dashboard (Production Readiness) | Tab: Dashboard + metrics + engineering demos |
-| Production risks route | `superdemo://dashboard/risks` |
-| Tab: Items (SwiftData CRUD) | Tab: Items (Room CRUD, seeded) |
-| Tab: Feed (JSONPlaceholder + cache + stale banner) | Same purpose via `CachingFeedRepository` |
-| Bookmark toggle | Local bookmark flag on cached posts |
-| Deep links `superdemo://…` | Same custom scheme |
-| watchOS / tvOS / Widget / Sign in with Apple / StoreKit / Flutter add-to-app | **Not ported** (Apple / optional surfaces) |
-
-## Open / build / run
-
-Requirements on this Mac Mini layout:
-
-- Android SDK at `~/Library/Android/sdk` (or set `sdk.dir` in `local.properties`)
-- JDK 17+ (JDK 21 recommended; Android Studio JBR works)
-- Optional: emulator AVD `Small_Phone_3`
+## Run the demo
 
 ```bash
 cd /Volumes/Lacie_Ssd/projects/super_demo_android
@@ -94,44 +61,52 @@ export JAVA_HOME="/Users/ilkersevim/Library/Java/JavaVirtualMachines/jbr-21.0.11
 export ANDROID_HOME="$HOME/Library/Android/sdk"
 export PATH="$JAVA_HOME/bin:$ANDROID_HOME/platform-tools:$ANDROID_HOME/emulator:$PATH"
 
-# Unit tests
-./gradlew testDebugUnitTest
-
-# Install debug APK
 ./gradlew :app:installDebug
-
-# Full local gate (unit + assemble + lint + connected instrumentation)
-# Requires AVD Small_Phone_3 online (API 36; headless -no-window is fine)
+# Full local gate (needs AVD Small_Phone_3 online):
 ./bin/checklist
 ```
 
-CI (GitHub Actions) runs unit tests, `assembleDebug`, `lintDebug`, and
-`assembleDebugAndroidTest`. Connected emulator tests stay local via
-`./bin/checklist` on this Mac Mini.
+Or open the project in Android Studio and run the `app` configuration.
 
-Android Studio: **Open** `/Volumes/Lacie_Ssd/projects/super_demo_android`, run the
-`app` configuration on an emulator or device.
+- [3-minute reviewer path](docs/portfolio.md#3-minute-path)
+- [Build & run](docs/build-and-run.md) · [Testing](docs/testing.md) · [CI map](docs/ci.md)
+- Deep links: `superdemo://feed/1` · `superdemo://items` · `superdemo://dashboard/risks`
 
-### Deep links
+[Documentation index](docs/README.md) · [CODEMAP](CODEMAP.md) · [DESIGN](DESIGN.md) · [MIT License](LICENSE)
 
-```bash
-adb shell am start -a android.intent.action.VIEW -d "superdemo://feed/1"
-adb shell am start -a android.intent.action.VIEW -d "superdemo://items"
-adb shell am start -a android.intent.action.VIEW -d "superdemo://dashboard/risks"
-```
+## Screenshots
 
-## Tests
+Emulator captures with sample / seeded Room data (first-launch offline seed).
 
-- **Unit:** `CachingFeedRepositoryTest`, `FeedViewModelTest`, `RoomItemRepositoryTest`, `AppDeepLinkTest`
-- **Instrumentation (Mac Mini emulator):** `MainActivitySmokeTest`, `OfflineFeedInstrumentationTest` — AVD `Small_Phone_3`
-- Details: [docs/testing.md](docs/testing.md)
+| Dashboard | Items | Feed |
+| --- | --- | --- |
+| <img src="docs/screenshots/android/dashboard.png" width="220" alt="Dashboard with release-health metrics"> | <img src="docs/screenshots/android/items.png" width="220" alt="Items with seeded Room rows"> | <img src="docs/screenshots/android/feed.png" width="220" alt="Feed list with bookmarks"> |
 
-## CI + local checklist
+More: [portfolio screenshots](docs/portfolio.md#screenshots) · Production risks UI in the same folder.
 
-GitHub Actions [`.github/workflows/ci.yml`](.github/workflows/ci.yml) runs on
-`main` / PRs: **unit tests**, **assembleDebug**, **Android Lint**,
-**assembleDebugAndroidTest**. Emulator instrumentation stays a **local** proof
-via `./bin/checklist` (not claimed on hosted CI). See [docs/ci.md](docs/ci.md).
+## Stack
+
+| Area | Choice |
+| --- | --- |
+| Language | Kotlin 2.1 |
+| UI | Jetpack Compose + Material 3 |
+| Architecture | Single-Activity, UDF ViewModels, feature folders |
+| Offline | Room source of truth + optional remote sync |
+| Navigation | Navigation Compose + `superdemo://` deep links |
+| DI | Hilt |
+| Async | Coroutines + Flow / StateFlow |
+| Networking | Retrofit + OkHttp + kotlinx.serialization (JSONPlaceholder) |
+| Build | Gradle KTS + version catalog · `minSdk 26` · `targetSdk`/`compileSdk` 36 |
+
+## Screens vs iOS (intentional)
+
+| iOS | Android |
+| --- | --- |
+| Dashboard / risks / demos | Same purpose (Compose) |
+| Items (SwiftData) | Items (Room, seed-once) |
+| Feed cache + stale | Room cache + stale banner |
+| Bookmark **outbox** sync | **Local-only** bookmarks (documented) |
+| watchOS / tvOS / Widget / Sign in with Apple / StoreKit / Flutter add-to-app | **Not ported** |
 
 ## License
 

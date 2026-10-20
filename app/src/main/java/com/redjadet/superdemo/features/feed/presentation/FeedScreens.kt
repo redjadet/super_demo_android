@@ -96,6 +96,9 @@ fun FeedRoute(
                         onRetry = viewModel::refresh,
                     )
                 }
+                state.posts.isEmpty() -> {
+                    FeedEmpty(onRetry = viewModel::refresh)
+                }
                 else -> {
                     Column(Modifier.fillMaxSize()) {
                         if (state.isStale || state.showingLocalOnly) {
@@ -105,15 +108,28 @@ fun FeedRoute(
                                     .fillMaxWidth()
                                     .testTag("feedStaleBanner"),
                             ) {
-                                Text(
-                                    text = if (state.isStale) {
-                                        "Offline / sync failed — showing local Room cache."
-                                    } else {
-                                        "Showing local posts (offline-first source of truth)."
-                                    },
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    modifier = Modifier.padding(12.dp),
-                                )
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(horizontal = 12.dp, vertical = 4.dp),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                ) {
+                                    Text(
+                                        text = if (state.isStale) {
+                                            "Offline / sync failed — showing local Room cache."
+                                        } else {
+                                            "Showing local posts (offline-first source of truth)."
+                                        },
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        modifier = Modifier.weight(1f),
+                                    )
+                                    TextButton(
+                                        onClick = viewModel::refresh,
+                                        modifier = Modifier.testTag("feedStaleRetry"),
+                                    ) {
+                                        Text("Retry")
+                                    }
+                                }
                             }
                         }
                         LazyColumn(
@@ -177,6 +193,34 @@ private fun FeedRow(
 }
 
 @Composable
+private fun FeedEmpty(onRetry: () -> Unit) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(24.dp)
+            .testTag("feedEmpty"),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        Text("No posts in the local cache yet.", style = MaterialTheme.typography.titleMedium)
+        Text(
+            text = "Pull to refresh or tap Retry to sync from the network.",
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(top = 8.dp),
+        )
+        TextButton(
+            onClick = onRetry,
+            modifier = Modifier
+                .padding(top = 12.dp)
+                .testTag("feedEmptyRetry"),
+        ) {
+            Text("Retry")
+        }
+    }
+}
+
+@Composable
 private fun FeedError(
     error: FeedDisplayError,
     onRetry: () -> Unit,
@@ -191,11 +235,21 @@ private fun FeedError(
     ) {
         Text(
             text = when (error) {
-                FeedDisplayError.Network -> "Could not load the feed."
+                FeedDisplayError.Network -> "Could not reach the network."
                 FeedDisplayError.Empty -> "No posts yet."
                 is FeedDisplayError.Unknown -> error.message
             },
-            style = MaterialTheme.typography.bodyLarge,
+            style = MaterialTheme.typography.titleMedium,
+        )
+        Text(
+            text = when (error) {
+                FeedDisplayError.Network ->
+                    "When Room already has posts, offline sync failure shows a stale banner instead of this screen."
+                else -> "Try again when you are online."
+            },
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(top = 8.dp),
         )
         TextButton(
             onClick = onRetry,

@@ -65,6 +65,11 @@ class SampleDashboardRepository @Inject constructor() : DashboardRepository {
                 title = "Offline first launch",
                 summary = "OfflineFeedSeed fills Room so Feed opens with airplane mode on.",
             ),
+            EngineeringDemo(
+                id = "evidence",
+                title = "Evidence: bookmark mid-refresh",
+                summary = "docs/EVIDENCE.md — merge latest bookmarks after network, inside one Room transaction.",
+            ),
         ),
         risks = listOf(
             "No production auth — demo only.",
@@ -72,6 +77,7 @@ class SampleDashboardRepository @Inject constructor() : DashboardRepository {
             "Release minify is intentionally off for reviewer readability.",
             "Wear / TV companions are iOS-only in the sibling repo; not claimed here.",
             "Bookmarks are local-only (no remote outbox sync in this Android sample).",
+            "Hosted CI does not run an emulator; connected tests are local via ./bin/checklist.",
         ),
     )
 }

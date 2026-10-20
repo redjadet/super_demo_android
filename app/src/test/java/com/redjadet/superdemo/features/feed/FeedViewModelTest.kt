@@ -5,9 +5,12 @@ import com.redjadet.superdemo.features.feed.domain.FeedLoadResult
 import com.redjadet.superdemo.features.feed.domain.FeedPost
 import com.redjadet.superdemo.features.feed.domain.FeedRepository
 import com.redjadet.superdemo.features.feed.domain.RefreshFeedUseCase
+import com.redjadet.superdemo.features.feed.domain.FeedDisplayError
 import com.redjadet.superdemo.features.feed.presentation.FeedViewModel
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -67,6 +70,61 @@ class FeedViewModelTest {
         assertThat(viewModel.state.value.isStale).isTrue()
         assertThat(viewModel.state.value.posts).isNotEmpty()
         assertThat(viewModel.state.value.error).isNull()
+    }
+
+    @Test
+    fun refresh_successEmptyRemoteSetsEmptyErrorNotNetwork() = runTest(dispatcher) {
+        val repository = FakeFeedRepository(
+            local = emptyList(),
+            refreshResult = FeedLoadResult(posts = emptyList(), fromCache = false, isStale = false),
+        )
+        val viewModel = FeedViewModel(RefreshFeedUseCase(repository), repository)
+        advanceUntilIdle()
+
+        assertThat(viewModel.state.value.posts).isEmpty()
+        assertThat(viewModel.state.value.error).isEqualTo(FeedDisplayError.Empty)
+    }
+
+    @Test
+    fun refresh_cancelKeepsLocalPostsWithoutNetworkError() = runTest(dispatcher) {
+        val hangStarted = CompletableDeferred<Unit>()
+        val repository = object : FeedRepository {
+            private val posts = MutableStateFlow(
+                listOf(FeedPost(1, "Local", "Body", 1)),
+            )
+            private var refreshCount = 0
+
+            override fun observePosts(): Flow<List<FeedPost>> = posts
+
+            override suspend fun refresh(): FeedLoadResult {
+                refreshCount += 1
+                if (refreshCount == 1) {
+                    hangStarted.complete(Unit)
+                    awaitCancellation()
+                }
+                return FeedLoadResult(posts = posts.value, fromCache = false)
+            }
+
+            override suspend fun toggleBookmark(postId: Int): FeedPost? = null
+
+            override suspend fun ensureSeededForOffline() = Unit
+        }
+
+        val viewModel = FeedViewModel(RefreshFeedUseCase(repository), repository)
+        // Pump until the first refresh parks on awaitCancellation (don't use
+        // advanceUntilIdle — it never finishes while a job is suspended).
+        var spins = 0
+        while (!hangStarted.isCompleted && spins < 50) {
+            dispatcher.scheduler.runCurrent()
+            spins += 1
+        }
+        assertThat(hangStarted.isCompleted).isTrue()
+        viewModel.refresh() // cancels the hung first refresh
+        advanceUntilIdle()
+
+        assertThat(viewModel.state.value.posts).isNotEmpty()
+        assertThat(viewModel.state.value.error).isNull()
+        assertThat(viewModel.state.value.isLoading).isFalse()
     }
 
     private class FakeFeedRepository(

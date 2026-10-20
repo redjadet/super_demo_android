@@ -31,22 +31,24 @@ class CachingFeedRepository @Inject constructor(
         ensureSeededForOffline()
         return try {
             val remoteResult = remote.fetchPosts()
-            // Read bookmarks after network returns so mid-flight toggles win.
-            val bookmarkMap = dao.getAll().associate { it.id to it.bookmarked }
             val now = System.currentTimeMillis()
-            val entities = remoteResult.posts.map { post ->
-                CachedFeedPostEntity(
-                    id = post.id,
-                    title = post.title,
-                    body = post.body,
-                    userId = post.userId,
-                    bookmarked = bookmarkMap[post.id] == true,
-                    cachedAtEpochMs = now,
-                )
-            }
-            database.withTransaction {
+            // Bookmark map + replace must share one transaction so a toggle after
+            // the network returns but before upsert cannot be overwritten.
+            val entities = database.withTransaction {
+                val bookmarkMap = dao.getAll().associate { it.id to it.bookmarked }
+                val mapped = remoteResult.posts.map { post ->
+                    CachedFeedPostEntity(
+                        id = post.id,
+                        title = post.title,
+                        body = post.body,
+                        userId = post.userId,
+                        bookmarked = bookmarkMap[post.id] == true,
+                        cachedAtEpochMs = now,
+                    )
+                }
                 dao.clear()
-                dao.upsertAll(entities)
+                dao.upsertAll(mapped)
+                mapped
             }
             FeedLoadResult(
                 posts = entities.map { it.toDomain() },

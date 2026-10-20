@@ -61,14 +61,17 @@ class FeedViewModel @Inject constructor(
                 val result = refreshFeed()
                 // Posts stay Room-driven via observePosts(); only sync metadata here.
                 _state.update {
+                    val empty = it.posts.isEmpty()
                     it.copy(
                         isLoading = false,
                         isStale = result.isStale,
                         showingLocalOnly = result.fromCache,
-                        error = if (it.posts.isEmpty() && result.posts.isEmpty()) {
-                            FeedDisplayError.Network
-                        } else {
-                            null
+                        error = when {
+                            !empty -> null
+                            // Offline/sync failure with empty Room → network error.
+                            result.fromCache || result.isStale -> FeedDisplayError.Network
+                            // Successful remote empty → empty state (not a network failure).
+                            else -> FeedDisplayError.Empty
                         },
                     )
                 }

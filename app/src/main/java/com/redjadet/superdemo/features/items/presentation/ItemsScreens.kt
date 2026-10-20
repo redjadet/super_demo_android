@@ -79,30 +79,58 @@ fun ItemsRoute(
                         .testTag("itemsError"),
                 )
             }
-            LazyColumn(
-                contentPadding = PaddingValues(bottom = 88.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-                modifier = Modifier.testTag("itemsList"),
-            ) {
-                items(state.items, key = { it.id }) { item ->
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable { onOpenItem(item.id) }
-                            .padding(vertical = 10.dp)
-                            .testTag("item_${item.id}"),
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        Column(modifier = Modifier.weight(1f)) {
-                            Text(item.title, style = MaterialTheme.typography.titleMedium)
-                            Text(
-                                text = item.notes,
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            )
-                        }
-                        IconButton(onClick = { viewModel.delete(item.id) }) {
-                            Icon(Icons.Filled.Delete, contentDescription = "Delete item")
+            if (state.isLoading) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .testTag("itemsLoading"),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Text("Loading items…")
+                }
+            } else if (state.items.isEmpty()) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .testTag("itemsEmpty"),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text("No items yet", style = MaterialTheme.typography.titleMedium)
+                        Text(
+                            text = "Add a title above, then tap + . Seeded samples appear once on first launch.",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.padding(top = 8.dp, start = 24.dp, end = 24.dp),
+                        )
+                    }
+                }
+            } else {
+                LazyColumn(
+                    contentPadding = PaddingValues(bottom = 88.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                    modifier = Modifier.testTag("itemsList"),
+                ) {
+                    items(state.items, key = { it.id }) { item ->
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable { onOpenItem(item.id) }
+                                .padding(vertical = 10.dp)
+                                .testTag("item_${item.id}"),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(item.title, style = MaterialTheme.typography.titleMedium)
+                                Text(
+                                    text = item.notes,
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                )
+                            }
+                            IconButton(onClick = { viewModel.delete(item.id) }) {
+                                Icon(Icons.Filled.Delete, contentDescription = "Delete item")
+                            }
                         }
                     }
                 }
@@ -140,46 +168,75 @@ fun ItemDetailRoute(
             )
         },
     ) { padding ->
-        if (state.isLoading) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(padding),
-                contentAlignment = Alignment.Center,
-            ) {
-                Text("Loading…")
+        when {
+            state.isLoading -> {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(padding)
+                        .testTag("itemDetailLoading"),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Text("Loading…")
+                }
             }
-        } else if (state.item == null) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(padding),
-                contentAlignment = Alignment.Center,
-            ) {
-                Text("Item $itemId not found.")
+            state.errorMessage != null && state.item == null -> {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(padding)
+                        .testTag("itemDetailError"),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Text(
+                        text = state.errorMessage!!,
+                        color = MaterialTheme.colorScheme.error,
+                        style = MaterialTheme.typography.bodyLarge,
+                    )
+                }
             }
-        } else {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(padding)
-                    .padding(16.dp)
-                    .testTag("itemDetail"),
-                verticalArrangement = Arrangement.spacedBy(12.dp),
-            ) {
-                OutlinedTextField(
-                    value = state.title,
-                    onValueChange = viewModel::onTitleChange,
-                    label = { Text("Title") },
-                    modifier = Modifier.fillMaxWidth(),
-                )
-                OutlinedTextField(
-                    value = state.notes,
-                    onValueChange = viewModel::onNotesChange,
-                    label = { Text("Notes") },
-                    modifier = Modifier.fillMaxWidth(),
-                    minLines = 4,
-                )
+            state.item == null -> {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(padding)
+                        .testTag("itemDetailMissing"),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Text("Item $itemId not found.")
+                }
+            }
+            else -> {
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(padding)
+                        .padding(16.dp)
+                        .testTag("itemDetail"),
+                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                ) {
+                    state.errorMessage?.let { message ->
+                        Text(
+                            text = message,
+                            color = MaterialTheme.colorScheme.error,
+                            style = MaterialTheme.typography.bodyMedium,
+                            modifier = Modifier.testTag("itemDetailSaveError"),
+                        )
+                    }
+                    OutlinedTextField(
+                        value = state.title,
+                        onValueChange = viewModel::onTitleChange,
+                        label = { Text("Title") },
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                    OutlinedTextField(
+                        value = state.notes,
+                        onValueChange = viewModel::onNotesChange,
+                        label = { Text("Notes") },
+                        modifier = Modifier.fillMaxWidth(),
+                        minLines = 4,
+                    )
+                }
             }
         }
     }

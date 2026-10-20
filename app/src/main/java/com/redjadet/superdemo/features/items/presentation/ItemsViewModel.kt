@@ -40,7 +40,12 @@ class ItemsViewModel @Inject constructor(
                 }
             repository.observeItems().collect { items ->
                 _state.update {
-                    it.copy(isLoading = false, items = items, errorMessage = null)
+                    it.copy(
+                        isLoading = false,
+                        items = items,
+                        // Keep seed/mutation errors visible when the list is still empty.
+                        errorMessage = if (items.isNotEmpty()) null else it.errorMessage,
+                    )
                 }
             }
         }
