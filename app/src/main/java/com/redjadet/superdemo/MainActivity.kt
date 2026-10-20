@@ -40,4 +40,9 @@ class MainActivity : ComponentActivity() {
             },
         )
     }
+
+    /** Instrumentation helper: deliver a deep link without replacing the launch Intent. */
+    fun deliverDeepLinkForTest(link: AppDeepLink?) {
+        onNewDeepLink?.invoke(link)
+    }
 }

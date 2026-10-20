@@ -17,11 +17,13 @@ idea — without Xcode / simulator shards.
 
 Artifacts: lint report (always), unit-test HTML report (on failure).
 
-Local full gate (includes emulator instrumentation): `./bin/checklist`.
+Local full gate (includes emulator instrumentation): [`./bin/checklist`](../bin/checklist).
 
 ## Honesty boundaries
 
-- **Instrumentation / emulator tests are not on CI** (heavy, flaky for this sample).
-  They are required on the Mac Mini local AVD (`Small_Phone_3`) — see
-  [testing.md](testing.md) and [build-and-run.md](build-and-run.md).
+- **Instrumentation / emulator tests are not on CI** (heavy for this sample).
+  Run them locally on any booted emulator/device via `./bin/checklist`
+  (see [testing.md](testing.md) and [local-proof.md](local-proof.md)).
+- Android Lint sets `checkTestSources = false` to avoid an AGP FIR crash on
+  Robolectric unit-test sources; app production sources are still linted.
 - Detekt is not required yet; Android Lint covers the static lane for v1.

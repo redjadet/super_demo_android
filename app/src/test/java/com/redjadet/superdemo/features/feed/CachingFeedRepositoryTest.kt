@@ -9,6 +9,8 @@ import com.redjadet.superdemo.features.feed.data.CachingFeedRepository
 import com.redjadet.superdemo.features.feed.data.RemoteFeedDataSource
 import com.redjadet.superdemo.features.feed.domain.FeedLoadResult
 import com.redjadet.superdemo.features.feed.domain.FeedPost
+import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import org.junit.After
@@ -71,10 +73,12 @@ class CachingFeedRepositoryTest {
 
     @Test
     fun refresh_preservesBookmarkToggledDuringNetworkWait() = runTest {
+        val fetchStarted = CompletableDeferred<Unit>()
+        val allowFetchToFinish = CompletableDeferred<Unit>()
         val remote = object : RemoteFeedDataSource {
             override suspend fun fetchPosts(): FeedLoadResult {
-                // Simulate toggle during in-flight request.
-                repository.toggleBookmark(1)
+                fetchStarted.complete(Unit)
+                allowFetchToFinish.await()
                 return FeedLoadResult(
                     posts = listOf(
                         FeedPost(1, "Hello", "Body", 1),
@@ -85,10 +89,14 @@ class CachingFeedRepositoryTest {
         }
         repository = CachingFeedRepository(remote, database.feedPostDao(), database)
         repository.ensureSeededForOffline()
-        // Seed id=1 starts bookmarked=true; toggle during fetch flips to false then merge should keep false? 
-        // Seed OfflineFeedSeed id=1 bookmarked=true. toggle -> false. Remote returns id=1; merge should keep false.
-        val result = repository.refresh()
+        // Seed id=1 starts bookmarked=true. Concurrent toggle while fetch is suspended → false.
+        val refreshDeferred = async { repository.refresh() }
+        fetchStarted.await()
+        repository.toggleBookmark(1)
+        allowFetchToFinish.complete(Unit)
+        val result = refreshDeferred.await()
         assertThat(result.posts.first { it.id == 1 }.bookmarked).isFalse()
+        assertThat(database.feedPostDao().getById(1)?.bookmarked).isFalse()
     }
 
     @Test

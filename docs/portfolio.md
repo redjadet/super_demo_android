@@ -1,7 +1,6 @@
 # Portfolio tour — super_demo_android
 
-Technical-reviewer guide for this **Kotlin / Compose / Room** sample. Sibling
-iOS tour: [super_demo_ios portfolio](https://github.com/redjadet/super_demo_ios/blob/main/superDemoApp/docs/portfolio.md).
+Technical-reviewer guide for this **Kotlin / Compose / Room** sample.
 
 **Evidence first:** [bookmark-during-refresh → design → regression](EVIDENCE.md#lead-case-preserve-bookmark-toggles-during-refresh),
 then [contribution and proof scope](EVIDENCE.md#my-contribution).
@@ -12,11 +11,10 @@ then [contribution and proof scope](EVIDENCE.md#my-contribution).
 2. **Feed** — Room list first; pull to sync; stale banner + Retry when remote fails
    (instrumentation forces remote failure).
 3. **Items** — one-time seeded Room CRUD; empty state after delete-all (no re-seed).
-4. **Deep link** — `adb shell am start -a android.intent.action.VIEW -d "superdemo://feed/1"`.
+4. **Deep link** — `adb shell am start -a android.intent.action.VIEW -d "superdemo://feed/1"`
+   (missing ids open a “Post not found.” detail).
 
-First launch seeds Feed/Items into empty Room stores (offline-first). Debug
-builds also set `BuildConfig.REVIEWER_DEMO_MODE=true` for future demo gates;
-seeding itself does not depend on that flag.
+First launch seeds Feed/Items into empty Room stores (offline-first).
 
 ## Reviewer map
 
@@ -24,34 +22,24 @@ seeding itself does not depend on that flag.
 | --- | --- | --- | --- |
 | Layer boundaries | `features/*/`, [layers.md](layers.md) | Presentation → Domain ← Data; Hilt in `core/di` | Manual + unit tests |
 | Offline Feed SoT | `CachingFeedRepository`, [offline-first.md](offline-first.md) | Seed → observe Room → transactional sync | Unit + `OfflineFeedInstrumentationTest` |
-| Bookmark mid-flight | [EVIDENCE.md](EVIDENCE.md) | Merge bookmarks after network, inside transaction | `refresh_preservesBookmarkToggledDuringNetworkWait` |
-| Cancellation | `FeedViewModel`, repository | Cancel prior refresh; rethrow cancel | `FeedViewModelTest.refresh_cancelKeepsLocalPostsWithoutNetworkError` |
+| Bookmark mid-flight | [EVIDENCE.md](EVIDENCE.md) | Merge bookmarks after network, inside transaction | concurrent `refresh_preservesBookmarkToggledDuringNetworkWait` |
+| Cancellation | `FeedViewModel`, repository | Cancel prior refresh; rethrow cancel | `FeedViewModelTest` |
 | Items Flow + seed-once | `ItemLocal`, `ItemSeedStore` | Emptying table does not re-seed | `RoomItemRepositoryTest` |
-| Deep links | `AppDeepLink`, `AppRoot` | Consume pending post id once | `AppDeepLinkTest`, smoke UI |
-| CI honesty | [ci.md](ci.md), `bin/checklist` | Hosted: unit/lint/assemble; emulator local | Workflow + checklist |
+| Deep links | `AppDeepLink`, `AppRoot`, Feed detail | Consume pending id; missing → not found | `AppDeepLinkTest`, `FeedDeepLinkInstrumentationTest` |
+| CI honesty | [ci.md](ci.md), `bin/checklist` | Hosted: unit/lint/assemble; emulator local | Workflow + [local-proof.md](local-proof.md) |
 | Design tokens | [DESIGN.md](../DESIGN.md) | M3 + stale banner role | Theme sources |
 
 ## Honesty
 
 This is a portfolio sample, **not** a Play Store product.
 
-**In repo:** clean layers, Room SoT, Compose/M3, Hilt, Navigation Compose,
-deep links, unit + instrumentation, GHA CI (no hosted emulator).
+**In repo:** clean feature layers (domain free of Hilt imports), Room SoT,
+Compose/M3, Hilt, Navigation Compose, deep links, unit + instrumentation,
+GHA CI (no hosted emulator).
 
-**Not claimed (intentional):** watchOS / tvOS / Widget companions, Sign in with
-Apple, StoreKit, Flutter add-to-app, UIKit showcase, bookmark **outbox** sync to
-a real backend, production auth, minify/R8 release hardening.
-
-## Screens vs iOS
-
-| iOS | Android | Notes |
-| --- | --- | --- |
-| Dashboard / Production Readiness | Dashboard | Compose metrics + demos |
-| Items (SwiftData) | Items (Room) | Same purpose; seed-once |
-| Feed + cache + stale | Feed + Room cache | Same purpose |
-| Bookmark outbox | Local bookmark flag | Documented trade-off |
-| Deep links `superdemo://` | Same scheme | Implemented |
-| Apple multi-platform extras | Not ported | See honesty |
+**Not claimed (intentional):** Apple multi-platform companions, bookmark
+**outbox** sync to a real backend, production auth, minify/R8 release
+hardening, background WorkManager sync, TTL-based cache expiry UI.
 
 ## Screenshots
 

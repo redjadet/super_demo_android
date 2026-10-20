@@ -75,9 +75,9 @@ class SampleDashboardRepository @Inject constructor() : DashboardRepository {
             "No production auth — demo only.",
             "JSONPlaceholder is a public sandbox; do not ship secrets against it.",
             "Release minify is intentionally off for reviewer readability.",
-            "Wear / TV companions are iOS-only in the sibling repo; not claimed here.",
             "Bookmarks are local-only (no remote outbox sync in this Android sample).",
             "Hosted CI does not run an emulator; connected tests are local via ./bin/checklist.",
+            "Room uses destructive migration for this sample schema (not a production migration path).",
         ),
     )
 }

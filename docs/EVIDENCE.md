@@ -1,8 +1,7 @@
 # Engineering evidence for technical reviewers
 
 Inspect one Feed cache race, its design decision, and regression tests; then
-contribution, proof scope, and related cases. Sibling iOS evidence style:
-[super_demo_ios EVIDENCE](https://github.com/redjadet/super_demo_ios/blob/main/superDemoApp/docs/EVIDENCE.md).
+contribution, proof scope, and related cases.
 
 ## Lead case: preserve bookmark toggles during refresh
 
@@ -13,37 +12,30 @@ overwrite the newer local intent when remote posts arrive.
 | Evidence | Inspect |
 | --- | --- |
 | **Design decision** | Keep Feed posts **Room-driven** via `Flow`. After the network returns, read the latest bookmark map **inside** the same `withTransaction` as `clear` + `upsert` so a toggle after the response cannot race the replace. Propagate `CancellationException` (no stale success). Bookmarks are **local-only** in this Android sample (no outbox / remote bookmark API). |
-| **Regression** | `CachingFeedRepositoryTest.refresh_preservesBookmarkToggledDuringNetworkWait` toggles id `1` inside the fake remote call and asserts the merged row keeps the mid-flight value. |
-| **Passing run** | [Unit · lint · assemble job](https://github.com/redjadet/super_demo_android/actions/runs/39382399129/job/118494406457) on **2026-10-20** at [`b13bebf`](https://github.com/redjadet/super_demo_android/commit/b13bebf727e346a33d485154ba4710358e029bbd). Full [CI run](https://github.com/redjadet/super_demo_android/actions/runs/39382399129) also passed. Hosted CI does **not** run a connected emulator; local proof is [`./bin/checklist`](../bin/checklist). |
+| **Regression** | `CachingFeedRepositoryTest.refresh_preservesBookmarkToggledDuringNetworkWait` suspends the fake remote, toggles id `1` on a concurrent coroutine, then completes the fetch and asserts the merged row keeps the mid-flight value. |
+| **Passing run** | [Unit · lint · assemble job](https://github.com/redjadet/super_demo_android/actions/runs/39385583052/job/118504511087) on **2026-10-20** at [`4c5b706`](https://github.com/redjadet/super_demo_android/commit/4c5b70603994e938f67ad6b8557826d93110dd28). Full [CI run](https://github.com/redjadet/super_demo_android/actions/runs/39385583052) also passed. Hosted CI does **not** run a connected emulator; local proof is [`./bin/checklist`](../bin/checklist) / [local-proof.md](local-proof.md). |
 | **Related** | `refresh_writesRemoteIntoCacheTransactionally`, `refresh_returnsLocalCacheWhenRemoteFails`, `toggleBookmark_isAtomic`. |
 | **Implementation** | [`CachingFeedRepository.kt`](../app/src/main/java/com/redjadet/superdemo/features/feed/data/CachingFeedRepository.kt) · [`FeedViewModel.kt`](../app/src/main/java/com/redjadet/superdemo/features/feed/presentation/FeedViewModel.kt). |
 
-**Trade-off vs iOS:** iOS proves a durable **outbox** race with remote bookmark
-sync. Android proves transactional local merge + Room SoT without claiming a
-sync engine. Honesty: [production risks](portfolio.md#honesty) and Dashboard
-risks screen.
+**Trade-off:** iOS proves a durable **outbox** race with remote bookmark sync.
+Android proves transactional local merge + Room SoT without claiming a sync
+engine. Honesty: [production risks](portfolio.md#honesty).
 
 ## My contribution
 
-I am **İlker Sevim**, owner of `redjadet/super_demo_android`. I own architecture,
-requirements, acceptance criteria, and whether evidence is enough to accept a
-change. Cursor / Codex assist with implementation drafts, tests, and docs.
-
-| Responsibility | Contribution |
-| --- | --- |
-| **Designed** | Feature folders, Hilt composition, Room as Feed/Items SoT, UDF ViewModels |
-| **Reviewed** | Offline degrade, cancellation, deep-link consume-once, CI honesty |
-| **Validated** | Unit suite + `./bin/checklist` (emulator instrumentation on Mac Mini) |
+I am **İlker Sevim**, owner of `redjadet/super_demo_android`. I designed,
+reviewed, and validated the architecture and acceptance criteria. Cursor / Codex
+assist with implementation drafts, tests, and docs.
 
 ## Verification and proof scope
 
 | Evidence | Commit and scope |
 | --- | --- |
-| **Recorded hosted run** | [Main run 39382399129](https://github.com/redjadet/super_demo_android/actions/runs/39382399129), **2026-10-20**, `b13bebf`: unit tests, assembleDebug, lintDebug, assembleDebugAndroidTest. Emulator instrumentation is **not** in this lane. |
-| **Unit** | `./gradlew testDebugUnitTest` — repository, ViewModel, Items, deep links |
-| **Local full gate** | `./bin/checklist` — unit + assemble + lint + `connectedDebugAndroidTest` on AVD `Small_Phone_3` |
+| **Recorded hosted run** | [Main run 39385583052](https://github.com/redjadet/super_demo_android/actions/runs/39385583052), **2026-10-20**, `4c5b706`: unit tests, assembleDebug, lintDebug, assembleDebugAndroidTest. Emulator instrumentation is **not** in this lane. |
+| **Unit** | `./gradlew testDebugUnitTest` — repository (incl. concurrent bookmark race), ViewModel, Items, deep links |
+| **Local full gate** | `./bin/checklist` — unit + assemble + lint + `connectedDebugAndroidTest` on a booted device/emulator |
 | **Hosted CI** | [`.github/workflows/ci.yml`](../.github/workflows/ci.yml) — unit, assembleDebug, lintDebug, assembleDebugAndroidTest. **Does not** run an emulator |
-| **Newer main runs** | [Actions · branch `main`](https://github.com/redjadet/super_demo_android/actions?query=branch%3Amain). Check each run's commit and jobs before treating it as runtime proof. |
+| **Newer main runs** | [Actions · branch `main`](https://github.com/redjadet/super_demo_android/actions?query=branch%3Amain). Prefer the newest green tip after each push. |
 
 ## More engineering cases
 
@@ -63,23 +55,31 @@ change. Cursor / Codex assist with implementation drafts, tests, and docs.
 | **Decision** | `refreshJob?.cancel()`; rethrow `CancellationException` in repository and ViewModel. |
 | **Source** | `FeedViewModel.refresh` · `CachingFeedRepository.refresh` |
 
-### 3. Items one-time seed + Room Flow
+### 3. Missing deep-link post id
 
 | Evidence | Inspect |
 | --- | --- |
-| **Problem** | Re-seeding after “delete all” contradicts “seeded once.” One-shot list reads go stale after detail edits. |
+| **Problem** | A `superdemo://feed/<missing>` deep link must not stay pending forever after a successful load. |
+| **Decision** | After Feed finishes loading, navigate to detail; detail shows “Post not found.” (`feedPostMissing`). |
+| **Proof** | `FeedDeepLinkInstrumentationTest.warmDeepLink_missingPost_showsNotFoundDetail` |
+
+### 4. Items one-time seed + Room Flow
+
+| Evidence | Inspect |
+| --- | --- |
+| **Problem** | Re-seeding after “delete all” contradicts “seeded once.” |
 | **Decision** | `ItemSeedStore` flag + `observeItems(): Flow`. |
 | **Regression** | `RoomItemRepositoryTest` |
 
 ## Reproduce
 
 ```bash
-cd /Volumes/Lacie_Ssd/projects/super_demo_android
-export JAVA_HOME="/Users/ilkersevim/Library/Java/JavaVirtualMachines/jbr-21.0.11/Contents/Home"
-export ANDROID_HOME="$HOME/Library/Android/sdk"
+cd /path/to/super_demo_android
+export JAVA_HOME="${JAVA_HOME:-$(/usr/libexec/java_home -v 21 2>/dev/null)}"
+export ANDROID_HOME="${ANDROID_HOME:-$HOME/Library/Android/sdk}"
 export PATH="$JAVA_HOME/bin:$ANDROID_HOME/platform-tools:$ANDROID_HOME/emulator:$PATH"
 
 ./gradlew testDebugUnitTest
-# Emulator must be online for the full gate:
+# Emulator/device must be online for the full gate:
 ./bin/checklist
 ```

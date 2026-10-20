@@ -17,6 +17,7 @@ Requires a running emulator/device (this Mac Mini: AVD `Small_Phone_3`, API 36).
 | --- | --- |
 | `MainActivitySmokeTest` | Dashboard default, Items/Feed tabs, risks navigation |
 | `OfflineFeedInstrumentationTest` | Feed list from Room source of truth when remote fails |
+| `FeedDeepLinkInstrumentationTest` | Warm `superdemo://feed/<missing>` → not-found detail |
 
 Hilt test runner: `com.redjadet.superdemo.HiltTestRunner`.
 

@@ -44,11 +44,10 @@ Toggle a bookmark while refresh is in flight: merge the **latest** Room
 bookmark map after the network returns, then replace posts inside one
 transaction so mid-flight toggles are not overwritten.
 [Problem, decision and regression](docs/EVIDENCE.md#lead-case-preserve-bookmark-toggles-during-refresh) ·
-[Passing unit job · 2026-10-20](https://github.com/redjadet/super_demo_android/actions/runs/39382399129/job/118494406457).
+[Passing CI · tip `4c5b706`](https://github.com/redjadet/super_demo_android/actions/runs/39385583052/job/118504511087).
 
-**My contribution:** architecture, intent, and edge cases; acceptance criteria;
-review of failure paths; unit + emulator validation. Agents assist with typing
-and syntax. [Responsibilities](docs/EVIDENCE.md#my-contribution).
+**My contribution:** designed / reviewed / validated by me; AI-assisted
+implementation. [Responsibilities](docs/EVIDENCE.md#my-contribution).
 
 - [Architecture tour](docs/architecture-tour.md) — layers, DI, Feed/Items paths
 - [Offline-first](docs/offline-first.md) — Room SoT, stale honesty
@@ -57,13 +56,13 @@ and syntax. [Responsibilities](docs/EVIDENCE.md#my-contribution).
 ## Run the demo
 
 ```bash
-cd /Volumes/Lacie_Ssd/projects/super_demo_android
-export JAVA_HOME="/Users/ilkersevim/Library/Java/JavaVirtualMachines/jbr-21.0.11/Contents/Home"
-export ANDROID_HOME="$HOME/Library/Android/sdk"
+cd /path/to/super_demo_android
+export JAVA_HOME="${JAVA_HOME:-$(/usr/libexec/java_home -v 21 2>/dev/null)}"
+export ANDROID_HOME="${ANDROID_HOME:-$HOME/Library/Android/sdk}"
 export PATH="$JAVA_HOME/bin:$ANDROID_HOME/platform-tools:$ANDROID_HOME/emulator:$PATH"
 
 ./gradlew :app:installDebug
-# Full local gate (needs AVD Small_Phone_3 online):
+# Full local gate (needs a booted emulator/device):
 ./bin/checklist
 ```
 
@@ -98,16 +97,6 @@ More: [portfolio screenshots](docs/portfolio.md#screenshots) · Production risks
 | Async | Coroutines + Flow / StateFlow |
 | Networking | Retrofit + OkHttp + kotlinx.serialization (JSONPlaceholder) |
 | Build | Gradle KTS + version catalog · `minSdk 26` · `targetSdk`/`compileSdk` 36 |
-
-## Screens vs iOS (intentional)
-
-| iOS | Android |
-| --- | --- |
-| Dashboard / risks / demos | Same purpose (Compose) |
-| Items (SwiftData) | Items (Room, seed-once) |
-| Feed cache + stale | Room cache + stale banner |
-| Bookmark **outbox** sync | **Local-only** bookmarks (documented) |
-| watchOS / tvOS / Widget / Sign in with Apple / StoreKit / Flutter add-to-app | **Not ported** |
 
 ## License
 

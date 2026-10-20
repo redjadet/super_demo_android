@@ -5,9 +5,31 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT"
 
-export JAVA_HOME="${JAVA_HOME:-/Users/ilkersevim/Library/Java/JavaVirtualMachines/jbr-21.0.11/Contents/Home}"
-export ANDROID_HOME="${ANDROID_HOME:-$HOME/Library/Android/sdk}"
+if [[ -z "${JAVA_HOME:-}" ]]; then
+  if command -v /usr/libexec/java_home >/dev/null 2>&1; then
+    JAVA_HOME="$(/usr/libexec/java_home -v 21 2>/dev/null || /usr/libexec/java_home 2>/dev/null || true)"
+  fi
+fi
+if [[ -z "${JAVA_HOME:-}" || ! -x "${JAVA_HOME}/bin/java" ]]; then
+  echo "ERROR: Set JAVA_HOME to a JDK 17+ (21 recommended)." >&2
+  exit 1
+fi
+export JAVA_HOME
+export ANDROID_HOME="${ANDROID_HOME:-${ANDROID_SDK_ROOT:-$HOME/Library/Android/sdk}}"
 export PATH="$JAVA_HOME/bin:$ANDROID_HOME/platform-tools:$ANDROID_HOME/emulator:$PATH"
+
+if ! command -v adb >/dev/null 2>&1; then
+  echo "ERROR: adb not found. Set ANDROID_HOME to an Android SDK with platform-tools." >&2
+  exit 1
+fi
+
+DEVICE_SERIAL="${ANDROID_SERIAL:-}"
+if [[ -z "$DEVICE_SERIAL" ]]; then
+  DEVICE_SERIAL="$(adb devices | awk '/emulator-.*device$/{print $1; exit}')"
+fi
+if [[ -z "$DEVICE_SERIAL" ]]; then
+  DEVICE_SERIAL="$(adb devices | awk '/\tdevice$/{print $1; exit}')"
+fi
 
 echo "==> Unit tests"
 ./gradlew testDebugUnitTest --stacktrace
@@ -18,21 +40,25 @@ echo "==> Assemble debug + androidTest"
 echo "==> Android Lint"
 ./gradlew :app:lintDebug --stacktrace
 
-if adb devices | grep -E 'emulator-[0-9]+\s+device' >/dev/null; then
-  # Fresh install state so Items seed-once + Feed Room seed are deterministic on a reused AVD.
+if [[ -n "$DEVICE_SERIAL" ]]; then
+  export ANDROID_SERIAL="$DEVICE_SERIAL"
+  # Fresh install state so Items seed-once + Feed Room seed are deterministic on a reused device.
   # Debug builds use applicationIdSuffix ".debug" (see app/build.gradle.kts).
   DEBUG_APP_ID="com.redjadet.superdemo.debug"
-  echo "==> Clear app data for instrumentation ($DEBUG_APP_ID)"
-  if adb shell pm path "$DEBUG_APP_ID" >/dev/null 2>&1; then
-    adb shell pm clear "$DEBUG_APP_ID"
+  echo "==> Clear app data for instrumentation ($DEBUG_APP_ID) on $DEVICE_SERIAL"
+  if adb -s "$DEVICE_SERIAL" shell pm path "$DEBUG_APP_ID" >/dev/null 2>&1; then
+    adb -s "$DEVICE_SERIAL" shell pm clear "$DEBUG_APP_ID"
   else
     echo "    (package not installed yet; connectedDebugAndroidTest will install)"
   fi
-  echo "==> Connected instrumentation (emulator present)"
+  echo "==> Connected instrumentation"
   ./gradlew connectedDebugAndroidTest --stacktrace
 else
-  echo "ERROR: No emulator device in 'adb devices'. Start AVD Small_Phone_3 first." >&2
+  echo "ERROR: No device/emulator in 'adb devices' with state 'device'." >&2
+  echo "Start any AVD (this Mac often uses Small_Phone_3) or set ANDROID_SERIAL." >&2
   exit 1
 fi
 
 echo "Checklist green."
+echo "Device: ${DEVICE_SERIAL}"
+echo "JAVA_HOME: ${JAVA_HOME}"

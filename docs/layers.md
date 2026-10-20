@@ -14,7 +14,8 @@ features/<Feature>/
 `presentation → domain ← data`
 
 Presentation must not import Room/Retrofit types. Data implements domain
-interfaces. Hilt binds implementations in `core/di`.
+interfaces. Domain types stay free of Android/Hilt imports; Hilt constructs
+use cases and binds repositories in `core/di` (`AppModule` + `RepositoryBindings`).
 
 ## Reference features
 

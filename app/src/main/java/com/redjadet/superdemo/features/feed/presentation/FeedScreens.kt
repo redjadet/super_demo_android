@@ -52,14 +52,13 @@ fun FeedRoute(
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 
-    LaunchedEffect(pendingPostId, state.posts) {
+    LaunchedEffect(pendingPostId, state.posts, state.isLoading) {
         val id = pendingPostId ?: return@LaunchedEffect
-        if (state.posts.any { it.id == id }) {
-            onOpenPost(id)
-            onPendingConsumed()
-        } else if (!state.isLoading && state.error != null) {
-            onPendingConsumed()
-        }
+        // Wait for a terminal Feed load (seed/refresh finished) before resolving.
+        if (state.isLoading) return@LaunchedEffect
+        // Open detail whether the id exists or not; detail shows "Post not found."
+        onOpenPost(id)
+        onPendingConsumed()
     }
 
     Scaffold(
@@ -288,7 +287,8 @@ fun FeedPostDetailRoute(
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(padding),
+                    .padding(padding)
+                    .testTag("feedPostMissing"),
                 contentAlignment = Alignment.Center,
             ) {
                 Text("Post not found.")

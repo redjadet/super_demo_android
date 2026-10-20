@@ -11,6 +11,7 @@
 | [navigation.md](navigation.md) | Tabs + deep links |
 | [testing.md](testing.md) | Unit + instrumentation |
 | [ci.md](ci.md) | GHA vs local checklist |
+| [local-proof.md](local-proof.md) | Emulator gate snapshot notes |
 | [build-and-run.md](build-and-run.md) | Toolchain commands |
 | [../DESIGN.md](../DESIGN.md) | Design tokens |
 | [../CODEMAP.md](../CODEMAP.md) | Task → path router |
