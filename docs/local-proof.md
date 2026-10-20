@@ -16,9 +16,8 @@ Hosted CI does **not** run connected instrumentation. The local gate is
 | Device | `emulator-5554` (AVD `Small_Phone_3`, API 16 image / Android 16) |
 | Result | **Checklist green** |
 
-Tip SHA for this proof is the commit that lands this file on `main` (see git history).
-Prefer also linking the matching hosted unit CI job in [EVIDENCE.md](EVIDENCE.md)
-after that push’s Actions run completes.
+| Tip SHA | [`f75bea2`](https://github.com/redjadet/super_demo_android/commit/f75bea26107c8bba65dccdbd9d8d0e75ce7ac004) |
+| Hosted unit CI | [run 39389215172](https://github.com/redjadet/super_demo_android/actions/runs/39389215172) |
 
 ## Notes
 
