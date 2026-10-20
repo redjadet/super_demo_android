@@ -94,12 +94,7 @@ fun DashboardRoute(
                     modifier = Modifier.padding(top = 6.dp),
                 )
             }
-            item {
-                Text("Release health", style = MaterialTheme.typography.titleLarge)
-            }
-            items(snapshot.metrics, key = { it.id }) { metric ->
-                MetricRow(metric)
-            }
+            // Keep above the fold on short hosted AVDs (API 34).
             item {
                 TextButton(
                     onClick = onOpenRisks,
@@ -112,6 +107,12 @@ fun DashboardRoute(
                         modifier = Modifier.padding(start = 4.dp),
                     )
                 }
+            }
+            item {
+                Text("Release health", style = MaterialTheme.typography.titleLarge)
+            }
+            items(snapshot.metrics, key = { it.id }) { metric ->
+                MetricRow(metric)
             }
             item {
                 Text("Engineering demos", style = MaterialTheme.typography.titleLarge)

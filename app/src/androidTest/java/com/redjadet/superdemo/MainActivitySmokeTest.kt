@@ -1,16 +1,15 @@
 package com.redjadet.superdemo
 
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
-import androidx.compose.ui.test.performTouchInput
-import androidx.compose.ui.test.swipeUp
+import androidx.compose.ui.test.performScrollToNode
 import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
-import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -74,11 +73,21 @@ class MainActivitySmokeTest {
 
     @Test
     fun dashboardRisks_navigatesToRisksList() {
-        // Risks link sits below the fold on shorter hosted AVDs (API 34).
         composeRule.waitUntil(timeoutMillis = 15_000) {
-            composeRule.onAllNodesWithTag("dashboardRisksLink").fetchSemanticsNodes().isNotEmpty()
+            composeRule.onAllNodesWithTag("dashboardList").fetchSemanticsNodes().isNotEmpty()
         }
-        composeRule.onNodeWithTag("dashboardRisksLink").performScrollTo().performClick()
+        // LazyColumn does not compose off-screen items; swipe until the link exists.
+        var composed = false
+        repeat(10) {
+            if (composeRule.onAllNodesWithTag("dashboardRisksLink").fetchSemanticsNodes().isNotEmpty()) {
+                composed = true
+                return@repeat
+            }
+            composeRule.onNodeWithTag("dashboardList").performTouchInput { swipeUp() }
+            composeRule.waitForIdle()
+        }
+        assertTrue("dashboardRisksLink not composed after scrolling dashboardList", composed)
+        composeRule.onNodeWithTag("dashboardRisksLink").performClick()
         composeRule.onNodeWithTag("risksList").assertIsDisplayed()
         composeRule.onNodeWithText("Production risks").assertIsDisplayed()
     }
