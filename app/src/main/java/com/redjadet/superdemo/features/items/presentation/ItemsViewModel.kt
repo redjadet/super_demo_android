@@ -67,7 +67,7 @@ class ItemsViewModel @Inject constructor(
             return
         }
         viewModelScope.launch {
-            runCatching { repository.addItem(title = title, notes = "Added from Items tab") }
+            runCatching { repository.addItem(title = title, notes = "") }
                 .onSuccess { _state.update { it.copy(draftTitle = "", errorMessage = null) } }
                 .onFailure { error ->
                     if (error is CancellationException) throw error
@@ -133,7 +133,9 @@ class ItemDetailViewModel @Inject constructor(
     }
 
     fun onTitleChange(value: String) {
-        _state.update { it.copy(title = value, saved = false) }
+        _state.update {
+            it.copy(title = value, saved = false, errorMessage = if (value.isNotBlank()) null else it.errorMessage)
+        }
     }
 
     fun onNotesChange(value: String) {
@@ -141,15 +143,20 @@ class ItemDetailViewModel @Inject constructor(
     }
 
     fun save() {
+        val title = _state.value.title.trim()
+        if (title.isEmpty()) {
+            _state.update { it.copy(errorMessage = "Title can’t be blank.", saved = false) }
+            return
+        }
         viewModelScope.launch {
             runCatching {
                 repository.updateItem(
                     id = itemId,
-                    title = _state.value.title,
+                    title = title,
                     notes = _state.value.notes,
                 )
             }.onSuccess { updated ->
-                _state.update { it.copy(item = updated, saved = updated != null) }
+                _state.update { it.copy(item = updated, saved = updated != null, errorMessage = null) }
             }.onFailure { error ->
                 if (error is CancellationException) throw error
                 _state.update {

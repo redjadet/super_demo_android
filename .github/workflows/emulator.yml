@@ -2,13 +2,16 @@ name: Emulator instrumentation
 
 # Hosted proof for connected tests. Uses API 34 (stable on ubuntu runners).
 # Local Mac checklist often runs API 36 — both are valid instrumentation lanes.
-# See docs/ci.md for honesty boundaries.
+# See docs/ci.md for validation scope.
 
 on:
   push:
     branches: [main]
   pull_request:
   workflow_dispatch:
+
+permissions:
+  contents: read
 
 concurrency:
   group: emulator-${{ github.workflow }}-${{ github.ref }}
@@ -80,7 +83,7 @@ jobs:
 
       - name: Upload connected report
         if: always()
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v7
         with:
           name: connected-android-test-report
           path: |

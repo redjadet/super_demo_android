@@ -2,82 +2,55 @@ package com.redjadet.superdemo.features.dashboard.data
 
 import com.redjadet.superdemo.features.dashboard.domain.DashboardRepository
 import com.redjadet.superdemo.features.dashboard.domain.DashboardSnapshot
+import com.redjadet.superdemo.features.dashboard.domain.DemoCapability
 import com.redjadet.superdemo.features.dashboard.domain.EngineeringDemo
-import com.redjadet.superdemo.features.dashboard.domain.ReadinessMetric
-import com.redjadet.superdemo.features.dashboard.domain.ReadinessStatus
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
 class SampleDashboardRepository @Inject constructor() : DashboardRepository {
     override suspend fun load(): DashboardSnapshot = DashboardSnapshot(
-        headline = "Android engineering portfolio",
-        metrics = listOf(
-            ReadinessMetric(
-                id = "layers",
-                title = "Clean layers",
-                status = ReadinessStatus.Ready,
-                detail = "Presentation → Domain ← Data with Hilt composition roots.",
-            ),
-            ReadinessMetric(
+        headline = "Offline by design",
+        capabilities = listOf(
+            DemoCapability(
                 id = "offline",
-                title = "Offline Feed cache",
-                status = ReadinessStatus.Ready,
-                detail = "Room is source of truth; remote sync updates cache transactionally.",
+                title = "A Feed that stays available",
+                detail = "Read saved posts and keep bookmarks, even when a refresh fails.",
             ),
-            ReadinessMetric(
-                id = "udf",
-                title = "UDF ViewModels",
-                status = ReadinessStatus.Ready,
-                detail = "StateFlow UI state; Feed posts stay Room-driven via Flow.",
-            ),
-            ReadinessMetric(
+            DemoCapability(
                 id = "items",
-                title = "Items CRUD",
-                status = ReadinessStatus.Ready,
-                detail = "Room Flow list + one-time seed flag (emptying table does not re-seed).",
+                title = "Your changes, kept locally",
+                detail = "Create, edit and delete Items. Changes stay on this device between launches.",
             ),
-            ReadinessMetric(
-                id = "ci",
-                title = "CI / delivery",
-                status = ReadinessStatus.Ready,
-                detail = "GitHub Actions: unit tests, assembleDebug, lintDebug, assembleDebugAndroidTest.",
+            DemoCapability(
+                id = "navigation",
+                title = "Direct paths into the app",
+                detail = "Open a post or tab from a deep link, with a clear state for missing content.",
             ),
         ),
         demos = listOf(
             EngineeringDemo(
-                id = "stale-feed",
-                title = "Stale Feed honesty",
-                summary = "Fail remote refresh to keep local Room posts + stale banner.",
-            ),
-            EngineeringDemo(
-                id = "deep-links",
-                title = "Deep links",
-                summary = "superdemo://feed/1, superdemo://items, superdemo://dashboard/risks",
+                id = "offline-feed",
+                title = "01  ·  Read offline",
+                summary = "Open Feed, turn off connectivity, then refresh. Saved posts remain available.",
             ),
             EngineeringDemo(
                 id = "room-items",
-                title = "Room Items CRUD",
-                summary = "Seeded once; add / edit / delete with Flow observation.",
+                title = "02  ·  Make it yours",
+                summary = "Add an Item, open it to edit notes, then relaunch to check persistence.",
             ),
             EngineeringDemo(
-                id = "offline-seed",
-                title = "Offline first launch",
-                summary = "OfflineFeedSeed fills Room so Feed opens with airplane mode on.",
-            ),
-            EngineeringDemo(
-                id = "evidence",
-                title = "Evidence: bookmark mid-refresh",
-                summary = "docs/EVIDENCE.md — merge latest bookmarks after network, inside one Room transaction.",
+                id = "bookmarks",
+                title = "03  ·  Keep a bookmark",
+                summary = "Bookmark a post and refresh the Feed. Your local bookmark is preserved.",
             ),
         ),
         risks = listOf(
-            "No production auth — demo only.",
-            "JSONPlaceholder is a public sandbox; do not ship secrets against it.",
-            "Release minify is intentionally off for reviewer readability.",
-            "Bookmarks are local-only (no remote outbox sync in this Android sample).",
-            "Hosted CI does not run an emulator; connected tests are local via ./bin/checklist.",
-            "Room uses destructive migration for this sample schema (not a production migration path).",
+            "Sample data: the Feed starts with local examples and refreshes from JSONPlaceholder, a public test API.",
+            "Local storage: Items and bookmarks stay on this device. Account sign-in and cross-device sync are outside this demo’s scope.",
+            "Foreground refresh: Feed sync runs when opened or refreshed. Background sync and cache-expiry rules are not implemented.",
+            "Schema changes: this sample uses destructive Room migration, which can reset local data after a schema upgrade.",
+            "Release configuration: code shrinking is disabled. Store distribution and release hardening need a separate pass.",
         ),
     )
 }

@@ -11,7 +11,7 @@ if [[ -z "${JAVA_HOME:-}" ]]; then
   fi
 fi
 if [[ -z "${JAVA_HOME:-}" || ! -x "${JAVA_HOME}/bin/java" ]]; then
-  echo "ERROR: Set JAVA_HOME to a JDK 17+ (21 recommended)." >&2
+  echo "ERROR: Set JAVA_HOME to a JDK 21." >&2
   exit 1
 fi
 export JAVA_HOME

@@ -1,5 +1,3 @@
-# super_demo_android
-
 [![CI](https://github.com/redjadet/super_demo_android/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/redjadet/super_demo_android/actions/workflows/ci.yml)
 [![Emulator](https://github.com/redjadet/super_demo_android/actions/workflows/emulator.yml/badge.svg?branch=main)](https://github.com/redjadet/super_demo_android/actions/workflows/emulator.yml)
 ![Kotlin](https://img.shields.io/badge/Kotlin-2.2.10-7F52FF?logo=kotlin&logoColor=white)
@@ -10,85 +8,114 @@
 ![Android](https://img.shields.io/badge/Platform-Android-3DDC84?logo=android&logoColor=white)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-**Reviewer links:** [3-minute path](docs/portfolio.md#3-minute-path) ·
-[Evidence](docs/EVIDENCE.md) · [Architecture tour](docs/architecture-tour.md) ·
-[Offline-first](docs/offline-first.md) · [Testing](docs/testing.md) ·
-[Local gate](bin/checklist)
+# Super Demo · Android
 
-A **Kotlin / Jetpack Compose / Room** engineering portfolio demo — the Android
-sibling of [super_demo_ios](https://github.com/redjadet/super_demo_ios). It shows
-clean feature layers, offline-first Feed caching, Room-backed Items CRUD,
-Navigation Compose deep links, and Hilt DI with UDF ViewModels.
+An Android engineering demo built with **Kotlin, Jetpack Compose and Room**.
+Explore offline reading, persistent edits and deep links in a small codebase
+with explicit feature boundaries and reproducible tests.
 
-This is a portfolio sample, **not** a Play Store product. Hosted **CI** runs
-unit/lint/assemble; hosted **Emulator** ([`emulator.yml`](.github/workflows/emulator.yml))
-runs connected tests on API 34 when the workflow is green. Local
-[`./bin/checklist`](bin/checklist) remains the full Mac gate (often API 36).
+[Technical review](docs/EVIDENCE.md) · [3-minute demo](docs/portfolio.md#3-minute-path) ·
+[Architecture](docs/architecture-tour.md) · [Build and run](docs/build-and-run.md)
 
-Author: [İlker Sevim](https://redjadet.github.io/react-web-portfolio/).
+| Dashboard | Items | Offline Feed |
+| :---: | :---: | :---: |
+| <img src="docs/screenshots/android/dashboard.png" width="240" alt="Dashboard introducing offline reading and local persistence"> | <img src="docs/screenshots/android/items.png" width="240" alt="Items list with a title field and labeled Add item action"> | <img src="docs/screenshots/android/feed.png" width="240" alt="Feed retaining saved posts after a failed refresh"> |
 
-## Engineering decisions and evidence
+*Android emulator captures with sample data. [Demo scope and screenshots](docs/portfolio.md#screenshots).*
 
-### Bookmark toggle during Feed refresh
+## What the demo shows
 
-Toggle a bookmark while refresh is in flight: merge the **latest** Room
-bookmark map after the network returns, then replace posts inside one
-transaction so mid-flight toggles are not overwritten.
-[Problem, decision and regression](docs/EVIDENCE.md#lead-case-preserve-bookmark-toggles-during-refresh) ·
-[Passing CI · tip `0a9e434`](https://github.com/redjadet/super_demo_android/actions/runs/39414201683).
+- **Offline Feed:** Room drives the list. A failed refresh keeps saved posts visible
+  with a clear retry state; bookmarks survive successful refreshes.
+- **Persistent Items:** create, edit and delete local entries. Sample Items seed once,
+  so deleting them leaves an empty list across launches.
+- **Direct navigation:** open tabs and Feed posts through `superdemo://` deep links,
+  including a defined missing-post state.
+- **Compose UI:** Material 3 light and dark themes, labeled actions, scrollable
+  details and constrained content width on larger windows.
 
-**My contribution:** designed / reviewed / validated by me; AI-assisted
-implementation. [Responsibilities](docs/EVIDENCE.md#my-contribution).
+## Start a technical review
 
-- [Architecture tour](docs/architecture-tour.md) — layers, DI, Feed/Items paths
-- [Offline-first](docs/offline-first.md) — Room SoT, stale honesty
-- [Portfolio / reviewer map](docs/portfolio.md) — 3-minute path and honesty table
+**Lead case: preserve a bookmark changed during refresh.** A network response must
+not overwrite a newer local toggle. The repository reads the latest bookmarks
+and replaces posts in one Room transaction after the response arrives.
 
-## Run the demo
+| Inspect | Entry point |
+| --- | --- |
+| Problem, decision and proof | [Engineering evidence](docs/EVIDENCE.md#lead-case-preserve-bookmark-toggles-during-refresh) |
+| Implementation | [CachingFeedRepository.kt](app/src/main/java/com/redjadet/superdemo/features/feed/data/CachingFeedRepository.kt) |
+| Concurrent regression test | [CachingFeedRepositoryTest.kt](app/src/test/java/com/redjadet/superdemo/features/feed/CachingFeedRepositoryTest.kt) — `refresh_preservesBookmarkToggledDuringNetworkWait` |
+| Reproduce the checks | [Testing](docs/testing.md) · [Local verification](docs/local-proof.md) |
+
+[Architecture tour](docs/architecture-tour.md) walks through dependency injection,
+Room observation, refresh state and navigation. [Evidence](docs/EVIDENCE.md)
+records validation scope and author responsibilities.
+
+## Run locally
+
+Use **JDK 21** and an Android SDK with **platform 37**. Boot an emulator or attach
+an Android device running **API 26+**, then run:
 
 ```bash
-cd /path/to/super_demo_android
-export JAVA_HOME="${JAVA_HOME:-$(/usr/libexec/java_home -v 21 2>/dev/null)}"
-export ANDROID_HOME="${ANDROID_HOME:-$HOME/Library/Android/sdk}"
-export PATH="$JAVA_HOME/bin:$ANDROID_HOME/platform-tools:$ANDROID_HOME/emulator:$PATH"
-
 ./gradlew :app:installDebug
-# Full local gate (needs a booted emulator/device):
-./bin/checklist
+adb shell am start -n com.redjadet.superdemo.debug/com.redjadet.superdemo.MainActivity
 ```
 
-Or open the project in Android Studio and run the `app` configuration.
+Or open the repository in Android Studio and run `app`.
+[Toolchain setup and device selection](docs/build-and-run.md).
 
-- [3-minute reviewer path](docs/portfolio.md#3-minute-path)
-- [Build & run](docs/build-and-run.md) · [Testing](docs/testing.md) · [CI map](docs/ci.md)
-- Deep links: `superdemo://feed/1` · `superdemo://items` · `superdemo://dashboard/risks`
+To try the offline path, open Feed, disable connectivity and refresh. Saved posts
+stay visible. Create an Item and relaunch to check that edits persist.
 
-[Documentation index](docs/README.md) · [CODEMAP](CODEMAP.md) · [DESIGN](DESIGN.md) · [MIT License](LICENSE)
+```bash
+adb shell am start -a android.intent.action.VIEW -d "superdemo://feed/1" -p com.redjadet.superdemo.debug
+```
 
-## Screenshots
+## Architecture and stack
 
-Emulator captures with sample / seeded Room data (first-launch offline seed).
+```mermaid
+flowchart LR
+    UI[Compose screens] --> VM[ViewModels / StateFlow]
+    VM --> Domain[Domain contracts]
+    Data[Repository implementations] --> Domain
+    Data --> Room[(Room / Flow)]
+    Data --> API[Retrofit / JSONPlaceholder]
+```
 
-| Dashboard | Items | Feed |
-| --- | --- | --- |
-| <img src="docs/screenshots/android/dashboard.png" width="220" alt="Dashboard with release-health metrics"> | <img src="docs/screenshots/android/items.png" width="220" alt="Items with seeded Room rows"> | <img src="docs/screenshots/android/feed.png" width="220" alt="Feed list with bookmarks"> |
+Hilt wires dependencies at the application boundary. Feed posts reach the UI
+through Room observation; foreground network refresh updates that store.
 
-More: [portfolio screenshots](docs/portfolio.md#screenshots) · Production risks UI in the same folder.
-
-## Stack
-
-| Area | Choice |
+| Area | Implementation |
 | --- | --- |
-| Language | Kotlin 2.1 |
-| UI | Jetpack Compose + Material 3 |
-| Architecture | Single-Activity, UDF ViewModels, feature folders |
-| Offline | Room source of truth + optional remote sync |
-| Navigation | Navigation Compose + `superdemo://` deep links |
-| DI | Hilt |
-| Async | Coroutines + Flow / StateFlow |
-| Networking | Retrofit + OkHttp + kotlinx.serialization (JSONPlaceholder) |
-| Build | Gradle KTS + version catalog · `minSdk 26` · `targetSdk`/`compileSdk` 36 |
+| UI and navigation | Jetpack Compose, Material 3, Navigation Compose |
+| State and async | UDF ViewModels, Coroutines, Flow / StateFlow |
+| Persistence | Room; DataStore for the Items seed flag |
+| Networking | Retrofit, OkHttp, kotlinx.serialization |
+| Dependency injection | Hilt |
+| Toolchain | AGP 9.4.1, Gradle 9.8.2, JDK 21; version catalog |
+| Android | `minSdk 26`; `compileSdk` / `targetSdk 37` |
 
-## License
+## Validation
 
-MIT — see [LICENSE](LICENSE).
+| Lane | Scope |
+| --- | --- |
+| [CI](https://github.com/redjadet/super_demo_android/actions/workflows/ci.yml) | Unit tests, Android Lint, debug app and instrumentation assembly; reports and debug APK artifacts |
+| [Emulator](https://github.com/redjadet/super_demo_android/actions/workflows/emulator.yml) | Connected instrumentation tests on API 34 |
+| [`./bin/checklist`](bin/checklist) | Unit tests, assembly, lint and connected tests on a local device or emulator |
+
+For a build without Android Studio, download `super-demo-debug` from a successful
+CI run’s **Artifacts** section. The APK uses the `.debug` application ID.
+[CI details and limits](docs/ci.md).
+
+## Demo scope
+
+The Feed uses JSONPlaceholder sample posts. Items and bookmarks stay on this
+device; refresh runs in the foreground. Account services, remote bookmark sync,
+background jobs and release distribution are outside this sample’s scope.
+[Storage and release trade-offs](docs/portfolio.md#demo-scope).
+
+Created by [İlker Sevim](https://redjadet.github.io/react-web-portfolio/).
+Android companion to [super_demo_ios](https://github.com/redjadet/super_demo_ios).
+
+[Documentation index](docs/README.md) · [Source map](CODEMAP.md) ·
+[Design notes](DESIGN.md) · [MIT License](LICENSE)

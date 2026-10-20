@@ -1,5 +1,7 @@
 package com.redjadet.superdemo.features.items.presentation
 
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -16,7 +18,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -30,6 +32,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -46,97 +49,99 @@ fun ItemsRoute(
     Scaffold(
         topBar = { TopAppBar(title = { Text("Items") }) },
         floatingActionButton = {
-            FloatingActionButton(
+            ExtendedFloatingActionButton(
                 onClick = viewModel::addDraft,
                 modifier = Modifier.testTag("itemsAdd"),
-            ) {
-                Icon(Icons.Filled.Add, contentDescription = "Add item")
-            }
+                icon = { Icon(Icons.Filled.Add, contentDescription = null) },
+                text = { Text("Add item") },
+            )
         },
     ) { padding ->
         ReviewerContentWidth(modifier = Modifier.padding(padding)) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = 16.dp),
-        ) {
-            OutlinedTextField(
-                value = state.draftTitle,
-                onValueChange = viewModel::onDraftTitleChange,
-                label = { Text("New item title") },
+            Column(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 8.dp, bottom = 12.dp)
-                    .testTag("itemsDraft"),
-                singleLine = true,
-            )
-            state.errorMessage?.let { message ->
-                Text(
-                    text = message,
-                    color = MaterialTheme.colorScheme.error,
-                    style = MaterialTheme.typography.bodyMedium,
+                    .fillMaxSize()
+                    .padding(horizontal = 16.dp),
+            ) {
+                OutlinedTextField(
+                    value = state.draftTitle,
+                    onValueChange = viewModel::onDraftTitleChange,
+                    label = { Text("New item title") },
                     modifier = Modifier
-                        .padding(bottom = 8.dp)
-                        .testTag("itemsError"),
+                        .fillMaxWidth()
+                        .padding(top = 8.dp, bottom = 12.dp)
+                        .testTag("itemsDraft"),
+                    singleLine = true,
                 )
-            }
-            if (state.isLoading) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .testTag("itemsLoading"),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Text("Loading items…")
+                state.errorMessage?.let { message ->
+                    Text(
+                        text = message,
+                        color = MaterialTheme.colorScheme.error,
+                        style = MaterialTheme.typography.bodyMedium,
+                        modifier = Modifier
+                            .padding(bottom = 8.dp)
+                            .testTag("itemsError"),
+                    )
                 }
-            } else if (state.items.isEmpty()) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .testTag("itemsEmpty"),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text("No items yet", style = MaterialTheme.typography.titleMedium)
-                        Text(
-                            text = "Add a title above, then tap + . Seeded samples appear once on first launch.",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.padding(top = 8.dp, start = 24.dp, end = 24.dp),
-                        )
+                if (state.isLoading) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .testTag("itemsLoading"),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Text("Loading items…")
                     }
-                }
-            } else {
-                LazyColumn(
-                    contentPadding = PaddingValues(bottom = 88.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp),
-                    modifier = Modifier.testTag("itemsList"),
-                ) {
-                    items(state.items, key = { it.id }) { item ->
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clickable { onOpenItem(item.id) }
-                                .padding(vertical = 10.dp)
-                                .testTag("item_${item.id}"),
-                            verticalAlignment = Alignment.CenterVertically,
-                        ) {
-                            Column(modifier = Modifier.weight(1f)) {
-                                Text(item.title, style = MaterialTheme.typography.titleMedium)
-                                Text(
-                                    text = item.notes,
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                )
-                            }
-                            IconButton(onClick = { viewModel.delete(item.id) }) {
-                                Icon(Icons.Filled.Delete, contentDescription = "Delete item")
+                } else if (state.items.isEmpty()) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .testTag("itemsEmpty"),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Text("No items yet", style = MaterialTheme.typography.titleMedium)
+                            Text(
+                                text = "Enter a title above, then tap Add item.",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.padding(top = 8.dp, start = 24.dp, end = 24.dp),
+                            )
+                        }
+                    }
+                } else {
+                    LazyColumn(
+                        contentPadding = PaddingValues(bottom = 88.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                        modifier = Modifier.testTag("itemsList"),
+                    ) {
+                        items(state.items, key = { it.id }) { item ->
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clickable { onOpenItem(item.id) }
+                                    .padding(vertical = 10.dp)
+                                    .testTag("item_${item.id}"),
+                                verticalAlignment = Alignment.CenterVertically,
+                            ) {
+                                Column(modifier = Modifier.weight(1f)) {
+                                    Text(item.title, style = MaterialTheme.typography.titleMedium, maxLines = 2, overflow = TextOverflow.Ellipsis)
+                                    Text(
+                                        text = item.notes,
+                                        maxLines = 2,
+                                        overflow = TextOverflow.Ellipsis,
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    )
+                                }
+                                IconButton(onClick = { viewModel.delete(item.id) }) {
+                                    Icon(Icons.Filled.Delete, contentDescription = "Delete item: ${item.title}")
+                                }
                             }
                         }
                     }
                 }
             }
-        }
         }
     }
 }
@@ -162,6 +167,7 @@ fun ItemDetailRoute(
                 actions = {
                     TextButton(
                         onClick = viewModel::save,
+                        enabled = !state.isLoading && state.item != null,
                         modifier = Modifier.testTag("itemSave"),
                     ) {
                         Text(if (state.saved) "Saved" else "Save")
@@ -170,74 +176,75 @@ fun ItemDetailRoute(
             )
         },
     ) { padding ->
-        when {
-            state.isLoading -> {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(padding)
-                        .testTag("itemDetailLoading"),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Text("Loading…")
+        ReviewerContentWidth(modifier = Modifier.padding(padding)) {
+            when {
+                state.isLoading -> {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .testTag("itemDetailLoading"),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Text("Loading…")
+                    }
                 }
-            }
-            state.errorMessage != null && state.item == null -> {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(padding)
-                        .testTag("itemDetailError"),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Text(
-                        text = state.errorMessage!!,
-                        color = MaterialTheme.colorScheme.error,
-                        style = MaterialTheme.typography.bodyLarge,
-                    )
-                }
-            }
-            state.item == null -> {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(padding)
-                        .testTag("itemDetailMissing"),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Text("Item $itemId not found.")
-                }
-            }
-            else -> {
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(padding)
-                        .padding(16.dp)
-                        .testTag("itemDetail"),
-                    verticalArrangement = Arrangement.spacedBy(12.dp),
-                ) {
-                    state.errorMessage?.let { message ->
+                state.errorMessage != null && state.item == null -> {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .testTag("itemDetailError"),
+                        contentAlignment = Alignment.Center,
+                    ) {
                         Text(
-                            text = message,
+                            text = state.errorMessage!!,
                             color = MaterialTheme.colorScheme.error,
-                            style = MaterialTheme.typography.bodyMedium,
-                            modifier = Modifier.testTag("itemDetailSaveError"),
+                            style = MaterialTheme.typography.bodyLarge,
                         )
                     }
-                    OutlinedTextField(
-                        value = state.title,
-                        onValueChange = viewModel::onTitleChange,
-                        label = { Text("Title") },
-                        modifier = Modifier.fillMaxWidth(),
-                    )
-                    OutlinedTextField(
-                        value = state.notes,
-                        onValueChange = viewModel::onNotesChange,
-                        label = { Text("Notes") },
-                        modifier = Modifier.fillMaxWidth(),
-                        minLines = 4,
-                    )
+                }
+                state.item == null -> {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .testTag("itemDetailMissing"),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Text("Item $itemId not found.")
+                    }
+                }
+                else -> {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .verticalScroll(rememberScrollState())
+                            .padding(16.dp)
+                            .testTag("itemDetail"),
+                        verticalArrangement = Arrangement.spacedBy(12.dp),
+                    ) {
+                        state.errorMessage?.let { message ->
+                            Text(
+                                text = message,
+                                color = MaterialTheme.colorScheme.error,
+                                style = MaterialTheme.typography.bodyMedium,
+                                modifier = Modifier.testTag("itemDetailSaveError"),
+                            )
+                        }
+                        OutlinedTextField(
+                            value = state.title,
+                            onValueChange = viewModel::onTitleChange,
+                            label = { Text("Title") },
+                            singleLine = true,
+                            isError = state.errorMessage == "Title can’t be blank.",
+                            modifier = Modifier.fillMaxWidth().testTag("itemTitle"),
+                        )
+                        OutlinedTextField(
+                            value = state.notes,
+                            onValueChange = viewModel::onNotesChange,
+                            label = { Text("Notes") },
+                            modifier = Modifier.fillMaxWidth(),
+                            minLines = 4,
+                        )
+                    }
                 }
             }
         }

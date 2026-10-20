@@ -9,7 +9,7 @@ Compose.
 | Concern | Doc |
 | --- | --- |
 | Feature folders / dependency direction | [layers.md](layers.md) |
-| Room SoT + sync honesty | [offline-first.md](offline-first.md) |
+| Room source of truth + refresh | [offline-first.md](offline-first.md) |
 | Tabs + `superdemo://` | [navigation.md](navigation.md) |
 | DI | `core/di/AppModule.kt`, `RepositoryBindings.kt` |
 

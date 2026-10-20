@@ -24,7 +24,7 @@ object OfflineFeedSeed {
         ),
         CachedFeedPostEntity(
             id = 3,
-            title = "Stale honesty",
+            title = "Keep reading offline",
             body = "If a later refresh fails, the UI keeps local posts and shows a stale banner.",
             userId = 2,
             bookmarked = false,

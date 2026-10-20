@@ -2,7 +2,7 @@
 
 | Doc | Purpose |
 | --- | --- |
-| [portfolio.md](portfolio.md) | 3-minute path, reviewer map, honesty, screenshots |
+| [portfolio.md](portfolio.md) | Demo path, review map, scope and screenshots |
 | [EVIDENCE.md](EVIDENCE.md) | Lead engineering case + contribution + proof scope |
 | [architecture-tour.md](architecture-tour.md) | Timed source walk (primary) |
 | [architecture.md](architecture.md) | Short map → tour / layers / offline |

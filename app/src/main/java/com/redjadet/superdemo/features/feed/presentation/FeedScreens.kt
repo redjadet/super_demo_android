@@ -1,5 +1,7 @@
 package com.redjadet.superdemo.features.feed.presentation
 
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -39,7 +41,6 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.redjadet.superdemo.app.ui.ReviewerContentWidth
-import com.redjadet.superdemo.app.ui.theme.Stale
 import com.redjadet.superdemo.features.feed.domain.FeedDisplayError
 import com.redjadet.superdemo.features.feed.domain.FeedPost
 
@@ -78,78 +79,79 @@ fun FeedRoute(
         },
     ) { padding ->
         ReviewerContentWidth(modifier = Modifier.padding(padding)) {
-        PullToRefreshBox(
-            isRefreshing = state.isLoading,
-            onRefresh = viewModel::refresh,
-            modifier = Modifier.fillMaxSize(),
-        ) {
-            when {
-                state.isLoading && state.posts.isEmpty() -> {
-                    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        CircularProgressIndicator(modifier = Modifier.testTag("feedLoading"))
+            PullToRefreshBox(
+                isRefreshing = state.isLoading,
+                onRefresh = viewModel::refresh,
+                modifier = Modifier.fillMaxSize(),
+            ) {
+                when {
+                    state.isLoading && state.posts.isEmpty() -> {
+                        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                            CircularProgressIndicator(modifier = Modifier.testTag("feedLoading"))
+                        }
                     }
-                }
-                state.error != null && state.posts.isEmpty() -> {
-                    FeedError(
-                        error = state.error!!,
-                        onRetry = viewModel::refresh,
-                    )
-                }
-                state.posts.isEmpty() -> {
-                    FeedEmpty(onRetry = viewModel::refresh)
-                }
-                else -> {
-                    Column(Modifier.fillMaxSize()) {
-                        if (state.isStale || state.showingLocalOnly) {
-                            val bannerText = if (state.isStale) {
-                                "Offline / sync failed — showing local Room cache."
-                            } else {
-                                "Showing local posts (offline-first source of truth)."
-                            }
-                            Surface(
-                                color = Stale.copy(alpha = 0.18f),
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .testTag("feedStaleBanner"),
-                            ) {
-                                Row(
+                    state.error != null && state.posts.isEmpty() -> {
+                        FeedError(
+                            error = state.error!!,
+                            onRetry = viewModel::refresh,
+                        )
+                    }
+                    state.posts.isEmpty() -> {
+                        FeedEmpty(onRetry = viewModel::refresh)
+                    }
+                    else -> {
+                        Column(Modifier.fillMaxSize()) {
+                            if (state.isStale || state.showingLocalOnly) {
+                                val bannerText = if (state.isStale) {
+                                    "Couldn’t refresh. Showing saved posts."
+                                } else {
+                                    "Showing posts saved on this device."
+                                }
+                                Surface(
+                                    color = MaterialTheme.colorScheme.tertiaryContainer,
+                                    contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .padding(horizontal = 12.dp, vertical = 4.dp),
-                                    verticalAlignment = Alignment.CenterVertically,
+                                        .testTag("feedStaleBanner"),
                                 ) {
-                                    Text(
-                                        text = bannerText,
-                                        style = MaterialTheme.typography.bodyMedium,
-                                        modifier = Modifier.weight(1f),
-                                    )
-                                    TextButton(
-                                        onClick = viewModel::refresh,
-                                        modifier = Modifier.testTag("feedStaleRetry"),
+                                    Row(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(horizontal = 12.dp, vertical = 4.dp),
+                                        verticalAlignment = Alignment.CenterVertically,
                                     ) {
-                                        Text("Retry")
+                                        Text(
+                                            text = bannerText,
+                                            style = MaterialTheme.typography.bodyMedium,
+                                            modifier = Modifier.weight(1f),
+                                        )
+                                        TextButton(
+                                            onClick = viewModel::refresh,
+                                            modifier = Modifier.testTag("feedStaleRetry"),
+                                        ) {
+                                            Text("Retry")
+                                        }
                                     }
                                 }
                             }
-                        }
-                        LazyColumn(
-                            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
-                            verticalArrangement = Arrangement.spacedBy(4.dp),
-                            modifier = Modifier.testTag("feedList"),
-                        ) {
-                            items(state.posts, key = { it.id }) { post ->
-                                FeedRow(
-                                    post = post,
-                                    onOpen = { onOpenPost(post.id) },
-                                    onToggleBookmark = { viewModel.toggleBookmark(post.id) },
-                                )
-                                HorizontalDivider()
+                            LazyColumn(
+                                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+                                verticalArrangement = Arrangement.spacedBy(4.dp),
+                                modifier = Modifier.testTag("feedList"),
+                            ) {
+                                items(state.posts, key = { it.id }) { post ->
+                                    FeedRow(
+                                        post = post,
+                                        onOpen = { onOpenPost(post.id) },
+                                        onToggleBookmark = { viewModel.toggleBookmark(post.id) },
+                                    )
+                                    HorizontalDivider()
+                                }
                             }
                         }
                     }
                 }
             }
-        }
         }
     }
 }
@@ -187,7 +189,7 @@ private fun FeedRow(
         IconButton(onClick = onToggleBookmark) {
             Icon(
                 imageVector = if (post.bookmarked) Icons.Filled.Bookmark else Icons.Filled.BookmarkBorder,
-                contentDescription = if (post.bookmarked) "Remove bookmark" else "Bookmark",
+                contentDescription = if (post.bookmarked) "Remove bookmark: ${post.title}" else "Bookmark: ${post.title}",
             )
         }
     }
@@ -203,9 +205,9 @@ private fun FeedEmpty(onRetry: () -> Unit) {
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Text("No posts in the local cache yet.", style = MaterialTheme.typography.titleMedium)
+        Text("No saved posts yet.", style = MaterialTheme.typography.titleMedium)
         Text(
-            text = "Pull to refresh or tap Retry to sync from the network.",
+            text = "Pull to refresh or tap Retry to load posts.",
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.padding(top = 8.dp),
@@ -245,7 +247,7 @@ private fun FeedError(
         Text(
             text = when (error) {
                 FeedDisplayError.Network ->
-                    "When Room already has posts, offline sync failure shows a stale banner instead of this screen."
+                    "Check your connection and try again. Posts will be available offline after they are saved."
                 else -> "Try again when you are online."
             },
             style = MaterialTheme.typography.bodyMedium,
@@ -285,32 +287,33 @@ fun FeedPostDetailRoute(
             )
         },
     ) { padding ->
-        if (post == null) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(padding)
-                    .testTag("feedPostMissing"),
-                contentAlignment = Alignment.Center,
-            ) {
-                Text("Post not found.")
-            }
-        } else {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(padding)
-                    .padding(20.dp)
-                    .testTag("feedPostDetail"),
-            ) {
-                Text(post.title, style = MaterialTheme.typography.headlineMedium)
-                Text(
-                    text = "User ${post.userId}",
-                    style = MaterialTheme.typography.labelLarge,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(top = 8.dp, bottom = 16.dp),
-                )
-                Text(post.body, style = MaterialTheme.typography.bodyLarge)
+        ReviewerContentWidth(modifier = Modifier.padding(padding)) {
+            if (post == null) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .testTag("feedPostMissing"),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Text("Post not found.")
+                }
+            } else {
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .verticalScroll(rememberScrollState())
+                        .padding(20.dp)
+                        .testTag("feedPostDetail"),
+                ) {
+                    Text(post.title, style = MaterialTheme.typography.headlineMedium)
+                    Text(
+                        text = "User ${post.userId}",
+                        style = MaterialTheme.typography.labelLarge,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(top = 8.dp, bottom = 16.dp),
+                    )
+                    Text(post.body, style = MaterialTheme.typography.bodyLarge)
+                }
             }
         }
     }
