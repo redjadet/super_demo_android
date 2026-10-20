@@ -32,6 +32,16 @@ lanes exercise the same `androidTest` suite; neither claims the other API level.
 Also: Android Lint sets `checkTestSources = false` to avoid an AGP FIR crash on
 Robolectric unit-test sources; app production sources are still linted.
 
+## SDK / dependency honesty
+
+- `compileSdk` / `targetSdk` **37** (Android 16). The IDE `EditedTargetSdkVersion`
+  inspection is a one-time editor nudge after the bump; behaviors that change at
+  37 were reviewed for this sample (no special photo-picker / bg-restriction paths).
+- AGP Lint `NewerVersionAvailable` still reports Kotlin **2.4**, Retrofit **3**,
+  OkHttp **5**, and kotlinx-serialization **1.12**. Those are deferred majors
+  (language / breaking HTTP stack) until a dedicated upgrade pass — not ignored
+  in lint config.
+
 ## Local gate
 
 Full local proof (unit + assemble + lint + connected): [`./bin/checklist`](../bin/checklist) ·
