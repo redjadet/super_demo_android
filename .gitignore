@@ -1,41 +1,59 @@
-*.iml
+# --- Gradle / Android build outputs ---
 .gradle/
-/local.properties
-/.idea/
-.DS_Store
-/build/
-/captures/
-.externalNativeBuild/
+**/build/
 .cxx/
+.externalNativeBuild/
+.kotlin/
+.navigation/
+captures/
+gen/
+out/
+# Keep repo `bin/` scripts (e.g. checklist); ignore generated Android bin/ if present.
+/app/bin/
+
+# Foojay / updateDaemonJvm regenerate this locally and on demand.
+gradle/gradle-daemon-jvm.properties
+
+# --- Local machine / secrets (never commit) ---
+local.properties
+*.keystore
+*.jks
+keystore.properties
+secrets.properties
+
+# --- IDE / editor ---
+*.iml
+*.ipr
+*.iws
+.idea/
+.fleet/
+*.swp
+*.swo
+*~
+
+# --- OS junk ---
+.DS_Store
+Thumbs.db
+
+# --- Packaging / bytecode / profiler dumps ---
 *.apk
 *.ap_
 *.aab
 *.dex
 *.class
-# Keep repo `bin/` scripts (e.g. checklist); ignore generated Android bin/ if present.
-/app/bin/
-gen/
-out/
-emulator.pid
-checklist-run.log
-build-verify.log
-assemble-androidtest.log
-.navigation/
-captures/
-output.json
 *.hprof
-.kotlin/
-app/build/
-**/build/
-local.properties
-emulator.log
+output.json
+
+# --- Local run / agent logs ---
 *.log
-connected-test.log
-build-unit.log
+emulator.pid
+
+# Codex CLI review dumps (local only)
 tasks/codex/
 
-# IDE inspection export dumps (local only)
+# --- IDE inspection export dumps (local only) ---
 /Inspections/
+# When Android Studio dumps inspection XMLs at repo root:
 /AndroidLint*.xml
 /Annotator.xml
 /CheckEmptyScriptTag.xml
